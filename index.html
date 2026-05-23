@@ -9,6 +9,7 @@
   <meta name="theme-color" content="#6c5ce7">
   <title>WebNotes — Your Programming Knowledge Hub</title>
   <link rel="stylesheet" href="index.css">
+  <link rel="stylesheet" href="carousel.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📝</text></svg>">
 </head>
 <body>
@@ -124,11 +125,29 @@
           <input type="text" class="search-input" id="search-input" placeholder="Search notes by title, language, or topic...">
         </div>
 
-        <div class="notes-grid" id="notes-grid">
-          <!-- Cards are rendered by JavaScript -->
+        <!-- Carousel loading indicator -->
+        <div class="carousel-loading" id="carousel-loading">
+          <div class="spinner"></div>
+          <span>Loading notes...</span>
         </div>
 
-        <div class="empty-state" id="empty-state" style="display:none;">
+        <!-- 3-card rotating carousel -->
+        <div class="carousel-outer" id="carousel-outer" style="display:none;">
+          <button class="carousel-btn" id="carousel-prev" aria-label="Previous note">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <div class="carousel-stage">
+            <div class="carousel-track" id="carousel-track">
+              <!-- Cards injected by JavaScript -->
+            </div>
+          </div>
+          <button class="carousel-btn" id="carousel-next" aria-label="Next note">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+        <div class="carousel-dots" id="carousel-dots"></div>
+
+        <div class="empty-state" id="carousel-empty" style="display:none;">
           <div class="empty-state-icon">📭</div>
           <h3>No notes found</h3>
           <p>Try a different search term or upload new notes.</p>
@@ -248,6 +267,8 @@
   <!-- html2pdf.js for PDF download -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js"></script>
 
+  <!-- Supabase database config -->
+  <script src="supabase-config.js"></script>
   <!-- Built-in notes content bundle -->
   <script src="notes-content.js"></script>
   <!-- Application JavaScript -->
