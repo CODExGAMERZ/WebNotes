@@ -1,23 +1,14 @@
-# OS Files
-.DS_Store
-Thumbs.db
-desktop.ini
+# Ignore everything by default
+*
 
-# IDEs and Editors
-.vscode/
-.idea/
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.swp
-*.swo
-
-# Local Server / Node (if used in future)
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Log files
-*.log
+# Whitelist files in the WebNotes repository structure
+!index.html
+!index.css
+!app.js
+!notes-content.js
+!.gitignore
+!README.md
+!Python_Reference_Notes.md
+!Java_OOP_Reference_Notes.md
+!C_Reference_Notes_DSA.md
+!.nojekyll
