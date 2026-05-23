@@ -1,0 +1,244 @@
+/* ========================================
+   WebNotes — Carousel Styles
+   Append this to the end of index.css
+   ======================================== */
+
+/* ── Carousel Outer Wrapper ── */
+.carousel-outer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 0 32px;
+  position: relative;
+}
+
+/* ── Carousel Stage (overflow hidden window) ── */
+.carousel-stage {
+  flex: 1;
+  overflow: hidden;
+  padding: 24px 0;            /* vertical room for scale effect */
+}
+
+/* ── Carousel Track (the 3-card row) ── */
+.carousel-track {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  will-change: transform, opacity;
+}
+
+/* Slide-out to the left (going forward / next) */
+.carousel-track.anim-out {
+  animation: c-slide-out 280ms cubic-bezier(0.4, 0, 1, 1) both;
+}
+/* Slide-out to the right (going backward / prev) */
+.carousel-track.anim-out-rev {
+  animation: c-slide-out-rev 280ms cubic-bezier(0.4, 0, 1, 1) both;
+}
+/* Slide-in from the right (after forward rotation) */
+.carousel-track.anim-in {
+  animation: c-slide-in 300ms cubic-bezier(0, 0, 0.2, 1) both;
+}
+/* Slide-in from the left (after backward rotation) */
+.carousel-track.anim-in-rev {
+  animation: c-slide-in-rev 300ms cubic-bezier(0, 0, 0.2, 1) both;
+}
+
+@keyframes c-slide-out {
+  0%   { transform: translateX(0);     opacity: 1; }
+  100% { transform: translateX(-80px); opacity: 0; }
+}
+@keyframes c-slide-out-rev {
+  0%   { transform: translateX(0);    opacity: 1; }
+  100% { transform: translateX(80px); opacity: 0; }
+}
+@keyframes c-slide-in {
+  0%   { transform: translateX(80px); opacity: 0; }
+  100% { transform: translateX(0);    opacity: 1; }
+}
+@keyframes c-slide-in-rev {
+  0%   { transform: translateX(-80px); opacity: 0; }
+  100% { transform: translateX(0);     opacity: 1; }
+}
+
+/* ── Carousel Cards — position variants ── */
+/* The note-card class already provides background, border, radius, etc. */
+/* We only override size, scale, opacity, and pointer-events here. */
+
+.carousel-card {
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity  0.3s ease,
+              box-shadow 0.3s ease;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Center card — hero position */
+.carousel-card.carousel-center {
+  width: 380px;
+  max-width: 380px;
+  transform: scale(1);
+  opacity: 1;
+  z-index: 2;
+  box-shadow: 0 12px 50px rgba(108, 92, 231, 0.25), var(--shadow-lg);
+}
+.carousel-card.carousel-center:hover {
+  transform: scale(1.03) translateY(-4px);
+  box-shadow: 0 20px 60px rgba(108, 92, 231, 0.35), var(--shadow-lg);
+}
+
+/* Side cards — secondary, slightly shrunk and dimmed */
+.carousel-card.carousel-left,
+.carousel-card.carousel-right {
+  width: 300px;
+  max-width: 300px;
+  transform: scale(0.88);
+  opacity: 0.52;
+  z-index: 1;
+}
+.carousel-card.carousel-left:hover,
+.carousel-card.carousel-right:hover {
+  opacity: 0.78;
+  transform: scale(0.91);
+}
+
+/* ── Arrow Buttons ── */
+.carousel-btn {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid var(--border-accent);
+  background: rgba(22, 22, 35, 0.85);
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  backdrop-filter: blur(10px);
+  z-index: 5;
+}
+.carousel-btn:hover {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  transform: scale(1.12);
+  box-shadow: 0 0 20px rgba(108, 92, 231, 0.4);
+}
+.carousel-btn:active {
+  transform: scale(0.97);
+}
+
+/* ── Dot indicators ── */
+.carousel-dots {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  padding-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.carousel-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--bg-glass-hover);
+  border: 1px solid var(--border-accent);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.carousel-dot.active {
+  width: 28px;
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 12px rgba(108, 92, 231, 0.4);
+}
+.carousel-dot:hover:not(.active) {
+  background: rgba(108, 92, 231, 0.4);
+  border-color: var(--accent-primary);
+}
+
+/* ── Empty state for carousel ── */
+#carousel-empty {
+  text-align: center;
+  padding: 60px 0;
+}
+
+/* ── Loading spinner for carousel ── */
+.carousel-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 80px 0;
+  gap: 16px;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+/* ── Mobile responsiveness ── */
+@media (max-width: 900px) {
+  .carousel-card.carousel-center {
+    width: 320px;
+    max-width: 320px;
+  }
+  .carousel-card.carousel-left,
+  .carousel-card.carousel-right {
+    width: 210px;
+    max-width: 210px;
+    transform: scale(0.84);
+    opacity: 0.42;
+  }
+}
+
+@media (max-width: 600px) {
+  .carousel-outer {
+    gap: 6px;
+  }
+  .carousel-stage {
+    padding: 16px 0;
+  }
+  .carousel-card.carousel-center {
+    width: calc(100vw - 120px);
+    max-width: 300px;
+  }
+  .carousel-card.carousel-left,
+  .carousel-card.carousel-right {
+    width: 80px;
+    max-width: 80px;
+    transform: scale(0.78);
+    opacity: 0.3;
+  }
+  /* On very small screens, hide side card text to reduce clutter */
+  .carousel-card.carousel-left .note-card-body,
+  .carousel-card.carousel-right .note-card-body {
+    display: none;
+  }
+  .carousel-card.carousel-left .note-card-banner,
+  .carousel-card.carousel-right .note-card-banner {
+    min-height: 80px;
+    border-radius: var(--radius-md);
+  }
+  .carousel-btn {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* ── Typing cursor ── */
+.typing-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  background: var(--accent-primary-light);
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
