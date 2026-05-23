@@ -796,20 +796,11 @@ function renderExistingUploads() {
 }
 
 // ── PDF Download Logic ──
-// WHY from(string) and not from(element):
-//   html2pdf().from(element) positions the element itself using its existing
-//   DOM geometry. If that element is off-screen (translateX, negative left, etc.)
-//   html2canvas reads a blank viewport rect → blank PDF.
-//   from(string) makes html2pdf create and manage its OWN container, appending
-//   it at body-level with correct geometry, so html2canvas always gets a
-//   visible, renderable element regardless of what the page is doing.
-//
-// WHY inline styles and not a <style> tag:
-//   html2canvas resolves styles by reading computed values. External/CDN
-//   stylesheets (highlight.js atom-one-dark) can taint the canvas on some
-//   origins (localhost in particular), causing toDataURL() to throw a
-//   SecurityError → blank PDF. With every colour baked in as an inline style
-//   attribute there is zero dependency on external CSS and zero CORS exposure.
+// Uses a dedicated print window. html2canvas/html2pdf produce blank PDFs on
+// localhost because the CDN highlight.js stylesheet taints the canvas and
+// blocks toDataURL(). The print window is fully self-contained with all styles
+// inlined — zero external requests, zero CORS, renders correctly every time.
+// User clicks "Download PDF" → print dialog opens → select "Save as PDF".
 downloadPdfBtn.addEventListener('click', () => {
   if (!activeNote) return;
 
@@ -817,161 +808,168 @@ downloadPdfBtn.addEventListener('click', () => {
   const originalHTML = downloadPdfBtn.innerHTML;
   downloadPdfBtn.innerHTML = `
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-         stroke-width="2" style="display:inline-block;vertical-align:middle;
-         margin-right:6px;animation:spin 1s linear infinite;">
+         stroke-width="2" style="display:inline-block;vertical-align:middle;margin-right:6px;">
       <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83
                M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
-    </svg>Generating…`;
+    </svg>Opening…`;
 
-  // ── 1. Clone rendered content, strip interactive chrome ──
-  const clone = viewerContent.cloneNode(true);
-  clone.querySelectorAll('.code-copy-btn, .code-header').forEach(el => el.remove());
+  // Clone content and strip interactive elements
+  const contentClone = document.createElement('div');
+  contentClone.innerHTML = viewerContent.innerHTML;
+  contentClone.querySelectorAll('.code-copy-btn, .code-header').forEach(el => el.remove());
 
-  // ── 2. Inline highlight.js token colours ──
-  // Replaces the CDN stylesheet dependency with direct colour values on each span.
-  const TOKEN_COLORS = {
-    'hljs-keyword':      '#c792ea', 'hljs-selector-tag': '#c792ea',
-    'hljs-built_in':     '#c792ea', 'hljs-name':         '#c792ea',
-    'hljs-tag':          '#c792ea',
-    'hljs-string':       '#c3e88d', 'hljs-title':        '#c3e88d',
-    'hljs-section':      '#c3e88d', 'hljs-attribute':    '#c3e88d',
-    'hljs-literal':      '#c3e88d', 'hljs-addition':     '#c3e88d',
-    'hljs-type':         '#c3e88d',
-    'hljs-comment':      '#546e7a', 'hljs-quote':        '#546e7a',
-    'hljs-deletion':     '#546e7a', 'hljs-meta':         '#546e7a',
-    'hljs-number':       '#f78c6c', 'hljs-regexp':       '#f78c6c',
-    'hljs-variable':     '#f78c6c', 'hljs-bullet':       '#f78c6c',
-    'hljs-link':         '#f78c6c',
-    'hljs-function':     '#82aaff', 'hljs-attr':         '#82aaff',
-    'hljs-class':        '#ffcb6b',
-    'hljs-params':       '#e0e0ef',
-    'hljs-operator':     '#89ddff', 'hljs-punctuation':  '#89ddff',
-  };
-  clone.querySelectorAll('[class]').forEach(el => {
-    const match = [...el.classList].find(c => TOKEN_COLORS[c]);
-    if (match) el.style.color = TOKEN_COLORS[match];
-  });
+  const printHTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>${activeNote.title}</title>
+  <style>
+    @page { margin: 15mm 18mm; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  // ── 3. Inline all block-level styles ──
-
-  // pre (code blocks)
-  clone.querySelectorAll('pre').forEach(pre => {
-    Object.assign(pre.style, {
-      background: '#1a1a2e', borderRadius: '8px', padding: '14px 16px',
-      margin: '14px 0', overflow: 'hidden', pageBreakInside: 'avoid',
-      border: '1px solid rgba(255,255,255,0.07)',
-    });
-  });
-  // code inside pre
-  clone.querySelectorAll('pre code').forEach(code => {
-    Object.assign(code.style, {
-      background: 'transparent', color: '#e0e0ef', fontSize: '0.83em',
-      lineHeight: '1.6', whiteSpace: 'pre-wrap', wordBreak: 'break-all',
-      fontFamily: "'Courier New', Consolas, monospace", padding: '0',
-    });
-  });
-  // inline code
-  clone.querySelectorAll('code').forEach(code => {
-    if (!code.closest('pre')) Object.assign(code.style, {
-      background: '#f0f0fa', color: '#c0392b', padding: '2px 5px',
-      borderRadius: '4px', fontFamily: "'Courier New', Consolas, monospace",
-      fontSize: '0.87em',
-    });
-  });
-
-  // headings
-  const H_COLOR = { H1:'#1a1a2e', H2:'#2d2d6e', H3:'#3a3a8a', H4:'#4a4a9a' };
-  clone.querySelectorAll('h1,h2,h3,h4,h5,h6').forEach(h => {
-    Object.assign(h.style, {
-      color: H_COLOR[h.tagName] || '#1a1a2e',
-      fontFamily: 'system-ui,-apple-system,sans-serif',
-      fontWeight: '700', marginTop: '22px', marginBottom: '6px',
-    });
-    if (h.tagName === 'H2') {
-      h.style.borderBottom = '1px solid #d0d0e8';
-      h.style.paddingBottom = '4px';
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      font-size: 13.5px;
+      line-height: 1.75;
+      color: #1a1a2e;
+      background: #fff;
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 24px 28px;
     }
+
+    /* Cover */
+    .pdf-cover { border-bottom: 3px solid #6c5ce7; padding-bottom: 14px; margin-bottom: 26px; }
+    .pdf-cover h1 { font-size: 1.9rem; font-weight: 800; color: #1a1a2e; margin-bottom: 8px; }
+    .pdf-meta { font-size: 0.85rem; color: #546e7a; }
+    .pdf-meta strong { color: #1a1a2e; }
+
+    /* Headings */
+    h1,h2,h3,h4,h5,h6 { color: #1a1a2e; font-weight: 700; margin: 22px 0 8px; line-height: 1.3; page-break-after: avoid; }
+    h2 { font-size: 1.25rem; color: #2d2d6e; border-bottom: 1px solid #d0d0e8; padding-bottom: 4px; }
+    h3 { font-size: 1.05rem; color: #3a3a8a; }
+    h4 { font-size: 0.95rem; color: #4a4a9a; }
+
+    p  { margin: 8px 0 12px; color: #1a1a2e; }
+    a  { color: #6c5ce7; }
+    hr { border: none; border-top: 1px solid #d0d0e0; margin: 18px 0; }
+    strong, b { font-weight: 700; }
+    em { font-style: italic; }
+
+    /* Inline code */
+    code {
+      background: #f0f0fa;
+      color: #c0392b;
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-family: 'Courier New', Consolas, monospace;
+      font-size: 0.87em;
+    }
+
+    /* Code blocks */
+    pre {
+      background: #1a1a2e;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin: 14px 0;
+      page-break-inside: avoid;
+      overflow: hidden;
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
+    pre code {
+      background: transparent;
+      color: #e0e0ef;
+      font-size: 0.82em;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      word-break: break-all;
+      padding: 0;
+      border-radius: 0;
+    }
+
+    /* highlight.js tokens */
+    .hljs-keyword,.hljs-selector-tag,.hljs-built_in,.hljs-name,.hljs-tag { color: #c792ea; }
+    .hljs-string,.hljs-title,.hljs-section,.hljs-attribute,.hljs-literal,.hljs-addition,.hljs-type { color: #c3e88d; }
+    .hljs-comment,.hljs-quote,.hljs-deletion,.hljs-meta { color: #7a8a99; font-style: italic; }
+    .hljs-number,.hljs-regexp,.hljs-variable,.hljs-bullet,.hljs-link { color: #f78c6c; }
+    .hljs-function,.hljs-attr { color: #82aaff; }
+    .hljs-class { color: #ffcb6b; }
+    .hljs-params { color: #e0e0ef; }
+    .hljs-operator,.hljs-punctuation { color: #89ddff; }
+
+    /* Lists */
+    ul, ol { padding-left: 24px; margin: 8px 0 12px; }
+    li { margin: 4px 0; color: #1a1a2e; }
+
+    /* Tables */
+    table { border-collapse: collapse; width: 100%; margin: 14px 0; page-break-inside: avoid; }
+    thead { background: #e8e8f8; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    th { padding: 8px 12px; text-align: left; font-weight: 600; color: #1a1a2e; border: 1px solid #d0d0e0; }
+    td { padding: 8px 12px; border: 1px solid #d0d0e0; color: #1a1a2e; }
+    tr:nth-child(even) td { background: #f6f6fc; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+
+    /* Callouts */
+    blockquote, .callout {
+      border-left: 4px solid #6c5ce7;
+      background: #f0eeff;
+      color: #2a2a5a;
+      padding: 12px 16px;
+      margin: 14px 0;
+      border-radius: 0 8px 8px 0;
+      page-break-inside: avoid;
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
+    .callout-note      { border-left-color:#0ea5e9; background:#e0f2fe; color:#0c4a6e; }
+    .callout-tip       { border-left-color:#22c55e; background:#dcfce7; color:#14532d; }
+    .callout-warning   { border-left-color:#f59e0b; background:#fef9c3; color:#713f12; }
+    .callout-caution   { border-left-color:#ef4444; background:#fee2e2; color:#7f1d1d; }
+    .callout-important { border-left-color:#8b5cf6; background:#ede9fe; color:#3b0764; }
+
+    @media print {
+      body { padding: 0; }
+      pre, table, blockquote, .callout { page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="pdf-cover">
+    <h1>${activeNote.title}</h1>
+    <div class="pdf-meta">
+      <strong>Language:</strong> ${activeNote.language} &nbsp;|&nbsp;
+      <strong>Sections:</strong> ${activeNote.sections} &nbsp;|&nbsp;
+      <strong>Source:</strong> ${activeNote.builtin ? 'Built-in Reference' : 'User Uploaded'}
+    </div>
+  </div>
+  ${contentClone.innerHTML}
+</body>
+</html>`;
+
+  const printWin = window.open('', '_blank', 'width=860,height=720');
+  if (!printWin) {
+    showToast('⚠ Allow pop-ups for this site, then try again.', 'error');
+    downloadPdfBtn.disabled = false;
+    downloadPdfBtn.innerHTML = originalHTML;
+    return;
+  }
+
+  printWin.document.open();
+  printWin.document.write(printHTML);
+  printWin.document.close();
+
+  printWin.addEventListener('load', () => {
+    setTimeout(() => {
+      printWin.focus();
+      printWin.print();
+      printWin.addEventListener('afterprint', () => printWin.close());
+    }, 350);
   });
 
-  // paragraphs / lists
-  clone.querySelectorAll('p').forEach(p => {
-    p.style.color = '#1a1a2e'; p.style.margin = '8px 0 12px';
-  });
-  clone.querySelectorAll('li').forEach(li => { li.style.color = '#1a1a2e'; });
-  clone.querySelectorAll('a').forEach(a => { a.style.color = '#6c5ce7'; });
-  clone.querySelectorAll('strong,b').forEach(s => {
-    s.style.fontWeight = '700'; s.style.color = 'inherit';
-  });
-  clone.querySelectorAll('hr').forEach(hr => { hr.style.borderColor = '#d0d0e0'; });
+  showToast('Print dialog opened — choose "Save as PDF"', 'success');
 
-  // blockquotes / callouts
-  clone.querySelectorAll('blockquote,.callout').forEach(el => {
-    Object.assign(el.style, {
-      borderLeft: '4px solid #6c5ce7', background: '#f0eeff',
-      color: '#2a2a5a', padding: '12px 16px', margin: '12px 0',
-      borderRadius: '0 8px 8px 0',
-    });
-  });
-
-  // tables
-  clone.querySelectorAll('table').forEach(t => {
-    t.style.borderCollapse = 'collapse'; t.style.width = '100%'; t.style.margin = '14px 0';
-  });
-  clone.querySelectorAll('th').forEach(th => Object.assign(th.style, {
-    background: '#e8e8f8', color: '#1a1a2e', padding: '7px 11px',
-    border: '1px solid #d0d0e0', fontWeight: '600', textAlign: 'left',
-  }));
-  clone.querySelectorAll('td').forEach(td => Object.assign(td.style, {
-    padding: '7px 11px', border: '1px solid #d0d0e0', color: '#1a1a2e',
-  }));
-
-  // ── 4. Build self-contained HTML string ──
-  // html2pdf manages positioning of the container it creates from this string,
-  // so there are no viewport/transform/off-screen issues.
-  const coverHTML = `
-    <div style="border-bottom:3px solid #6c5ce7;padding-bottom:14px;margin-bottom:24px;">
-      <h1 style="font-size:2rem;font-weight:800;color:#1a1a2e;margin:0 0 6px;
-                 font-family:system-ui,-apple-system,sans-serif;">${activeNote.title}</h1>
-      <div style="font-size:0.87rem;color:#546e7a;font-family:sans-serif;">
-        <strong style="color:#1a1a2e;">Language:</strong> ${activeNote.language}&nbsp;|&nbsp;
-        <strong style="color:#1a1a2e;">Sections:</strong> ${activeNote.sections}&nbsp;|&nbsp;
-        <strong style="color:#1a1a2e;">Source:</strong> ${activeNote.builtin ? 'Built-in Reference' : 'User Uploaded'}
-      </div>
-    </div>`;
-
-  const htmlString = `
-    <div style="width:780px;padding:28px 32px;background:#ffffff;color:#1a1a2e;
-                font-family:system-ui,-apple-system,'Segoe UI',sans-serif;
-                font-size:14px;line-height:1.75;box-sizing:border-box;">
-      ${coverHTML}
-      ${clone.innerHTML}
-    </div>`;
-
-  // ── 5. Generate & download ──
-  showToast('Building PDF…', 'info');
-
-  html2pdf().set({
-    margin:      [10, 0, 10, 0],   // top/bottom only; left/right handled by container padding
-    filename:    `${activeNote.title.toLowerCase().replace(/[^a-z0-9]+/g, '_')}.pdf`,
-    image:       { type: 'jpeg', quality: 0.97 },
-    html2canvas: {
-      scale:           2,
-      useCORS:         true,
-      allowTaint:      true,
-      logging:         false,
-      backgroundColor: '#ffffff',
-    },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-  }).from(htmlString, 'string').save()
-    .then(() => showToast('✅ PDF downloaded!', 'success'))
-    .catch(err => {
-      console.error('PDF error:', err);
-      showToast('PDF generation failed — see console for details.', 'error');
-    })
-    .finally(() => {
-      downloadPdfBtn.disabled = false;
-      downloadPdfBtn.innerHTML = originalHTML;
-    });
+  downloadPdfBtn.disabled = false;
+  downloadPdfBtn.innerHTML = originalHTML;
 });
 
 // ── Initialize ──
