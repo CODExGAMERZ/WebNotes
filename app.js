@@ -552,40 +552,82 @@ function buildTOC() {
     tocList.appendChild(li);
   });
 
-  // Active TOC highlighting on scroll
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        tocList.querySelectorAll('a').forEach(a => a.classList.remove('active'));
-        const activeLink = tocList.querySelector(`a[href="#${entry.target.id}"]`);
-        if (activeLink) {
-          activeLink.classList.add('active');
-          
-          // Smoothly scroll the active TOC item into view inside the sidebar container
-          const sidebar = document.getElementById('toc-sidebar');
-          if (sidebar) {
-            const sidebarRect = sidebar.getBoundingClientRect();
-            const linkRect = activeLink.getBoundingClientRect();
-            
-            if (linkRect.top < sidebarRect.top) {
-              sidebar.scrollTo({
-                top: sidebar.scrollTop - (sidebarRect.top - linkRect.top + 15),
-                behavior: 'smooth'
-              });
-            } else if (linkRect.bottom > sidebarRect.bottom) {
-              sidebar.scrollTo({
-                top: sidebar.scrollTop + (linkRect.bottom - sidebarRect.bottom + 15),
-                behavior: 'smooth'
-              });
-            }
-          }
-        }
-      }
-    });
-  }, { rootMargin: '-80px 0px -60% 0px', threshold: 0.1 });
+  // ── Active TOC highlighting on scroll ──
+  // Uses a scroll listener + rAF instead of IntersectionObserver.
+  //
+  // WHY: IntersectionObserver fires a callback for EVERY heading that enters or
+  // leaves the viewport in a single scroll event. During fast scrolling several
+  // headings can transition simultaneously, so the callback runs multiple times
+  // per frame — each run clears and re-sets the active class, causing visible
+  // flicker. Additionally, calling sidebar.scrollTo() inside the observer
+  // callback triggers layout recalculation which re-fires the observer → loop.
+  //
+  // The scroll listener finds the single "best" active heading in one pass per
+  // animation frame (rAF throttle), updates only when the result actually
+  // changes, and scrolls the sidebar with a one-shot timeout so it never
+  // interferes with the heading detection logic.
 
-  headings.forEach(h => observer.observe(h));
-  _tocObserver = observer; // save reference for cleanup on next note open
+  let _rafPending = false;
+  let _activeHeadingId = null;
+
+  const NAVBAR_HEIGHT = 100; // px — offset so heading isn't hidden under fixed nav
+
+  const updateActiveTOC = () => {
+    // Find the last heading whose top edge is at or above the offset line.
+    // That heading is the one currently "in view" at the top of the reading area.
+    let best = null;
+    for (const h of headings) {
+      if (h.getBoundingClientRect().top <= NAVBAR_HEIGHT + 8) {
+        best = h;
+      } else {
+        break; // headings are in document order; once we pass the line we're done
+      }
+    }
+
+    // Fall back to the first heading if we're above everything
+    const targetId = best ? best.id : (headings[0] ? headings[0].id : null);
+    if (!targetId || targetId === _activeHeadingId) return; // nothing changed
+    _activeHeadingId = targetId;
+
+    // Update active class — single DOM write, no flicker
+    const links = tocList.querySelectorAll('a');
+    let activeLink = null;
+    links.forEach(a => {
+      const isActive = a.getAttribute('href') === `#${targetId}`;
+      a.classList.toggle('active', isActive);
+      if (isActive) activeLink = a;
+    });
+
+    // Scroll the sidebar so the active link stays visible.
+    // Deferred by one task so it never runs inside the scroll event handler
+    // (avoids triggering layout thrash or observer re-entry).
+    if (activeLink && tocSidebar) {
+      setTimeout(() => {
+        const sr = tocSidebar.getBoundingClientRect();
+        const lr = activeLink.getBoundingClientRect();
+        if (lr.top < sr.top + 8) {
+          tocSidebar.scrollBy({ top: lr.top - sr.top - 16, behavior: 'smooth' });
+        } else if (lr.bottom > sr.bottom - 8) {
+          tocSidebar.scrollBy({ top: lr.bottom - sr.bottom + 16, behavior: 'smooth' });
+        }
+      }, 0);
+    }
+  };
+
+  const onScroll = () => {
+    if (_rafPending) return;
+    _rafPending = true;
+    requestAnimationFrame(() => {
+      updateActiveTOC();
+      _rafPending = false;
+    });
+  };
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  updateActiveTOC(); // set correct highlight immediately when note opens
+
+  // Store cleanup refs so the next note open can remove the old listener
+  _tocObserver = { disconnect: () => window.removeEventListener('scroll', onScroll) };
 }
 
 // ── Copy Code Button ──
