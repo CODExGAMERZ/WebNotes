@@ -1336,12 +1336,12 @@ Unlike C/C++, which compile directly to CPU-specific machine binary code, and Py
 
 \`\`\`
 [Source Code (.java)]
-        │
-        ▼  javac (compiler)
+        |
+        v  javac (compiler)
 [Bytecode (.class)]
-        │
-        ▼  JVM (interpreter + JIT compiler)
-[Native Machine Code]  ──▶  Executed by CPU
+        |
+        v  JVM (interpreter + JIT compiler)
+[Native Machine Code]  -->  Executed by CPU
 \`\`\`
 
 ### Key JVM Components
@@ -1361,27 +1361,25 @@ Unlike C/C++, which compile directly to CPU-specific machine binary code, and Py
 Understanding how the JVM organizes memory is critical for writing performant applications and diagnosing issues like \`OutOfMemoryError\`.
 
 \`\`\`
-┌─────────────────────────────────────────────────────┐
-│                     JVM MEMORY                      │
-├──────────────────────┬──────────────────────────────┤
-│     HEAP (Shared)    │     NON-HEAP                 │
-│  ┌────────────────┐  │  ┌────────────────────────┐  │
-│  │   Young Gen    │  │  │     Metaspace           │  │
-│  │  ┌──────────┐  │  │  │  (Class metadata,       │  │
-│  │  │   Eden   │  │  │  │   method bytecode,      │  │
-│  │  ├──────────┤  │  │  │   constant pools)       │  │
-│  │  │Survivor 0│  │  │  └────────────────────────┘  │
-│  │  ├──────────┤  │  │  ┌────────────────────────┐  │
-│  │  │Survivor 1│  │  │  │   Thread Stacks         │  │
-│  │  └──────────┘  │  │  │  (One stack per thread:  │  │
-│  ├────────────────┤  │  │   local vars, frames)    │  │
-│  │   Old Gen      │  │  └────────────────────────┘  │
-│  │  (Tenured)     │  │  ┌────────────────────────┐  │
-│  │                │  │  │  Code Cache              │  │
-│  └────────────────┘  │  │  (JIT-compiled code)     │  │
-└──────────────────────┴──┴────────────────────────┘  │
-                                                       │
-└─────────────────────────────────────────────────────┘
++-----------------------------------------------------+
+|                     JVM MEMORY                      |
++----------------------+------------------------------+
+|     HEAP (Shared)    |           NON-HEAP           |
+|  +----------------+  |  +------------------------+  |
+|  |   Young Gen    |  |  |       Metaspace        |  |
+|  |  +----------+  |  |  |    (Class metadata,    |  |
+|  |  |   Eden   |  |  |  |     method bytecode,   |  |
+|  |  +----------+  |  |  |     constant pools)    |  |
+|  |  |Survivor 0|  |  |  +------------------------+  |
+|  |  +----------+  |  |  +------------------------+  |
+|  |  |Survivor 1|  |  |  |     Thread Stacks      |  |
+|  |  +----------+  |  |  | (One stack per thread:  |  |
+|  +----------------+  |  |   local vars, frames)  |  |
+|  |    Old Gen     |  |  +------------------------+  |
+|  |   (Tenured)    |  |  +------------------------+  |
+|  |                |  |  |      Code Cache        |  |
+|  +----------------+  |  | (JIT-compiled hot code)  |  |
++----------------------+--+---------------------------+
 \`\`\`
 
 **Heap Regions:**
@@ -1520,25 +1518,25 @@ Java maintains a special memory region within the Heap called the **String Pool*
 
 \`\`\`
                  HEAP MEMORY
-    ┌────────────────────────────────────┐
-    │        String Pool                 │
-    │   ┌──────────┐  ┌──────────┐      │
-    │   │ "Hello"  │  │ "World"  │      │
-    │   └────▲─────┘  └──────────┘      │
-    │        │                           │
-    │        │  (both point here)        │
-    │        │                           │
-    ├────────┼───────────────────────────┤
-    │        │   Regular Heap Objects    │
-    │   ┌────┴─────┐                    │
-    │   │ "Hello"  │ ← new String()     │
-    │   └──────────┘   (separate copy)  │
-    └────────────────────────────────────┘
+    +------------------------------------+
+    |        String Pool                 |
+    |   +----------+  +----------+       |
+    |   | "Hello"  |  | "World"  |       |
+    |   +----^-----+  +----------+       |
+    |        |                           |
+    |        |  (both point here)        |
+    |        |                           |
+    +--------+---------------------------+
+    |        |   Regular Heap Objects    |
+    |   +----+-----+                    |
+    |   | "Hello"  | <-- new String()    |
+    |   +----------+   (separate copy)  |
+    +------------------------------------+
 
 Stack:
-  s1 ──────┐
-  s2 ──────┘──▶  Pool "Hello"  (same reference)
-  s3 ──────────▶  Heap "Hello"  (different object)
+  s1 ------+
+  s2 ------+-->  Pool "Hello"  (same reference)
+  s3 ---------->  Heap "Hello"  (different object)
 \`\`\`
 
 \`\`\`java
@@ -3005,7 +3003,7 @@ The **Collections Framework** is a unified architecture for storing, retrieving,
 
 \`\`\`
                        Iterable<T>
-                           │
+                           |
                       Collection<T>
                      /       |       \\
                 List<T>    Set<T>    Queue<T>
