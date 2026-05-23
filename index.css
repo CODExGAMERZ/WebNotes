@@ -1293,7 +1293,7 @@ a:hover { color: var(--accent-secondary); }
 }
 
 .btn-toc-toggle {
-  display: inline-flex; /* Visible on desktop too — lets users collapse/expand the TOC */
+  display: none; /* Desktop: TOC is always visible — button only used on mobile */
   align-items: center;
   gap: 8px;
   padding: 8px 18px;
@@ -1308,14 +1308,6 @@ a:hover { color: var(--accent-secondary); }
   font-family: var(--font-sans);
   height: 38px;
   outline: none;
-}
-
-/* When TOC is collapsed on desktop */
-.note-layout.toc-collapsed {
-  grid-template-columns: minmax(0, 860px);
-}
-.note-layout.toc-collapsed .toc-sidebar {
-  display: none;
 }
 
 .btn-toc-toggle:hover {
@@ -1608,8 +1600,7 @@ a:hover { color: var(--accent-secondary); }
   }
   
   .btn-toc-toggle {
-    /* already inline-flex from base styles; mobile just keeps it visible */
-    display: inline-flex;
+    display: inline-flex; /* Show on mobile so users can open the drawer */
   }
 
   .toc-sidebar {

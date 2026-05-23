@@ -100,45 +100,23 @@ hamburger.addEventListener('click', () => {
   navLinks.classList.toggle('open');
 });
 
-// ── TOC Sidebar — Desktop collapse/expand + Mobile drawer ──
+// ── TOC Sidebar — always visible on desktop, slide-in drawer on mobile ──
 if (tocToggleBtn && tocSidebar && tocCloseBtn && sidebarOverlay) {
-  const noteLayout = document.querySelector('.note-layout');
   const isMobile = () => window.innerWidth <= 1024;
 
   const openTOC = () => {
-    if (isMobile()) {
-      // Mobile: slide-in drawer
-      tocSidebar.classList.add('open');
-      sidebarOverlay.classList.add('active');
-      document.body.classList.add('toc-open');
-    } else {
-      // Desktop: show the TOC column
-      noteLayout && noteLayout.classList.remove('toc-collapsed');
-      tocToggleBtn.textContent = '📋 Outline';
-    }
+    tocSidebar.classList.add('open');
+    sidebarOverlay.classList.add('active');
+    document.body.classList.add('toc-open');
   };
 
   const closeTOC = () => {
-    if (isMobile()) {
-      tocSidebar.classList.remove('open');
-      sidebarOverlay.classList.remove('active');
-      document.body.classList.remove('toc-open');
-    } else {
-      // Desktop: collapse the TOC column
-      noteLayout && noteLayout.classList.add('toc-collapsed');
-      tocToggleBtn.textContent = '📋 Show Outline';
-    }
+    tocSidebar.classList.remove('open');
+    sidebarOverlay.classList.remove('active');
+    document.body.classList.remove('toc-open');
   };
 
-  const toggleTOC = () => {
-    if (isMobile()) {
-      tocSidebar.classList.contains('open') ? closeTOC() : openTOC();
-    } else {
-      noteLayout && noteLayout.classList.contains('toc-collapsed') ? openTOC() : closeTOC();
-    }
-  };
-
-  tocToggleBtn.addEventListener('click', toggleTOC);
+  tocToggleBtn.addEventListener('click', () => { if (isMobile()) openTOC(); });
   tocCloseBtn.addEventListener('click', closeTOC);
   sidebarOverlay.addEventListener('click', closeTOC);
 }
