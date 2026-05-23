@@ -1,14 +1,36 @@
-# Ignore everything by default
+# Ignore everything
 *
 
-# Whitelist files in the WebNotes repository structure
+# Allow these files
+!.gitignore
+!README.md
 !index.html
 !index.css
 !app.js
 !notes-content.js
-!.gitignore
-!README.md
 !Python_Reference_Notes.md
 !Java_OOP_Reference_Notes.md
 !C_Reference_Notes_DSA.md
-!.nojekyll
+
+# Allow git to read folders
+!*/
+
+# Ignore unwanted folders
+recordings/
+node_modules/
+dist/
+build/
+
+# OS / editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Optional
+package-lock.json
+netlify.toml
+start.bat
+start.sh
+.nojekyll
+]
