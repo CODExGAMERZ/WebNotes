@@ -531,17 +531,24 @@ function buildTOC() {
     _tocObserver = null;
   }
 
-  const headings = viewerContent.querySelectorAll('h2, h3');
+  // Only use h2 headings — h3 items (numbered sub-sections, "Practice Questions",
+  // "Real-World Analogy") repeat across every section and make the TOC unreadable.
+  // h2 gives one entry per major section which is exactly what a TOC is for.
+  const headings = Array.from(viewerContent.querySelectorAll('h2'));
+
+  // Deduplicate: if the same label appears more than once, append a counter so
+  // each TOC link is distinct and the active-highlight logic stays correct.
+  const seenLabels = {};
   headings.forEach(h => {
     const li = document.createElement('li');
     const a = document.createElement('a');
     a.href = `#${h.id}`;
-    a.textContent = h.textContent;
-    if (h.tagName === 'H3') a.classList.add('toc-h3');
+    const label = h.textContent.trim();
+    seenLabels[label] = (seenLabels[label] || 0) + 1;
+    a.textContent = seenLabels[label] > 1 ? `${label} (${seenLabels[label]})` : label;
     a.addEventListener('click', (e) => {
       e.preventDefault();
       h.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      // Close mobile TOC drawer if open
       if (tocSidebar && tocSidebar.classList.contains('open')) {
         tocSidebar.classList.remove('open');
         sidebarOverlay.classList.remove('active');
