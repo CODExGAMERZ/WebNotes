@@ -100,21 +100,45 @@ hamburger.addEventListener('click', () => {
   navLinks.classList.toggle('open');
 });
 
-// ── TOC Sidebar Mobile Drawer ──
+// ── TOC Sidebar — Desktop collapse/expand + Mobile drawer ──
 if (tocToggleBtn && tocSidebar && tocCloseBtn && sidebarOverlay) {
+  const noteLayout = document.querySelector('.note-layout');
+  const isMobile = () => window.innerWidth <= 1024;
+
   const openTOC = () => {
-    tocSidebar.classList.add('open');
-    sidebarOverlay.classList.add('active');
-    document.body.classList.add('toc-open'); // Prevent main page scrolling when drawer is open
+    if (isMobile()) {
+      // Mobile: slide-in drawer
+      tocSidebar.classList.add('open');
+      sidebarOverlay.classList.add('active');
+      document.body.classList.add('toc-open');
+    } else {
+      // Desktop: show the TOC column
+      noteLayout && noteLayout.classList.remove('toc-collapsed');
+      tocToggleBtn.textContent = '📋 Outline';
+    }
   };
 
   const closeTOC = () => {
-    tocSidebar.classList.remove('open');
-    sidebarOverlay.classList.remove('active');
-    document.body.classList.remove('toc-open');
+    if (isMobile()) {
+      tocSidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('active');
+      document.body.classList.remove('toc-open');
+    } else {
+      // Desktop: collapse the TOC column
+      noteLayout && noteLayout.classList.add('toc-collapsed');
+      tocToggleBtn.textContent = '📋 Show Outline';
+    }
   };
 
-  tocToggleBtn.addEventListener('click', openTOC);
+  const toggleTOC = () => {
+    if (isMobile()) {
+      tocSidebar.classList.contains('open') ? closeTOC() : openTOC();
+    } else {
+      noteLayout && noteLayout.classList.contains('toc-collapsed') ? openTOC() : closeTOC();
+    }
+  };
+
+  tocToggleBtn.addEventListener('click', toggleTOC);
   tocCloseBtn.addEventListener('click', closeTOC);
   sidebarOverlay.addEventListener('click', closeTOC);
 }
@@ -608,10 +632,6 @@ fileInput.addEventListener('change', (e) => {
 
 function handleFiles(files) {
   Array.from(files).forEach(file => {
-    if (file.name.toLowerCase() === 'readme.md') {
-      showToast('README.md cannot be loaded as a study note', 'warning');
-      return;
-    }
     const ext = file.name.split('.').pop().toLowerCase();
     if (!['md', 'txt', 'markdown'].includes(ext)) {
       showToast(`${file.name} is not a supported file type`, 'error');
@@ -776,217 +796,184 @@ function renderExistingUploads() {
 }
 
 // ── PDF Download Logic ──
-// Uses a dedicated print window instead of html2canvas, which silently produces
-// blank PDFs when cross-origin stylesheets (e.g. highlight.js from cdnjs) taint
-// the canvas and block toDataURL(). The print window approach is reliable in all
-// browsers and produces vector (not raster) output — much crisper text.
 downloadPdfBtn.addEventListener('click', () => {
   if (!activeNote) return;
 
-  // Clone the rendered content and strip interactive UI elements
-  const contentClone = document.createElement('div');
-  contentClone.innerHTML = viewerContent.innerHTML;
-  contentClone.querySelectorAll('.code-copy-btn').forEach(btn => btn.remove());
+  downloadPdfBtn.classList.add('loading');
+  const originalText = downloadPdfBtn.innerHTML;
+  downloadPdfBtn.innerHTML = `
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="spinner" style="margin: 0; display: inline-block; width: 14px; height: 14px; border-width: 2px;"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg>
+    Generating PDF...
+  `;
 
-  const filename = activeNote.title.toLowerCase().replace(/[^a-z0-9]+/g, '_') + '.pdf';
+  // ── FIX: Use transform to move wrapper off-screen instead of z-index: -9999.
+  // html2canvas cannot capture elements that are behind other elements (z-index < 0
+  // falls behind body::before), causing all-blank pages. transform: translateX(-110%)
+  // keeps the element fully rendered and capturable while invisible to the user.
+  const wrapper = document.createElement('div');
+  wrapper.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    transform: translateX(-110%);
+    width: 800px;
+    z-index: 9999;
+    overflow: visible;
+    pointer-events: none;
+    background: #ffffff;
+  `;
 
-  // Build a self-contained HTML document for the print window.
-  // All styles are inlined — no external fetches needed — so there are zero
-  // CORS issues and the window renders instantly even on localhost.
-  const printHTML = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>${activeNote.title}</title>
-  <style>
-    /* ── Page setup ── */
-    @page { margin: 15mm 18mm; }
-    * { box-sizing: border-box; }
+  const pdfContainer = document.createElement('div');
+  pdfContainer.className = 'pdf-export-container';
+  pdfContainer.style.cssText = `
+    position: relative;
+    width: 100%;
+    background: #ffffff;
+    color: #1a1a2e;
+    padding: 20px;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+  `;
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-      font-size: 14px;
-      line-height: 1.75;
-      color: #1a1a2e;
-      background: #fff;
-      max-width: 780px;
-      margin: 0 auto;
-      padding: 24px;
+  // Inject a scoped style block that forces light-mode colors for all
+  // elements inside the PDF container, overriding any inherited dark-theme
+  // CSS variables so html2canvas captures readable content.
+  const pdfStyle = document.createElement('style');
+  pdfStyle.textContent = `
+    .pdf-export-container, .pdf-export-container * {
+      color: #1a1a2e !important;
+      background-color: transparent !important;
+      border-color: #d0d0e0 !important;
     }
-
-    /* ── Cover block ── */
-    .pdf-cover {
-      border-bottom: 3px solid #6c5ce7;
-      padding-bottom: 16px;
-      margin-bottom: 28px;
+    .pdf-export-container h1, .pdf-export-container h2,
+    .pdf-export-container h3, .pdf-export-container h4 {
+      color: #1a1a2e !important;
+      border-bottom: 1px solid #d0d0e0;
+      padding-bottom: 6px;
+      margin-top: 24px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     }
-    .pdf-cover h1 {
-      font-size: 2rem;
-      font-weight: 800;
-      color: #1a1a2e;
-      margin: 0 0 8px;
-    }
-    .pdf-meta {
-      font-size: 0.88rem;
-      color: #546e7a;
-    }
-    .pdf-meta strong { color: #1a1a2e; }
-
-    /* ── Headings ── */
-    h1, h2, h3, h4, h5, h6 {
-      color: #1a1a2e;
-      margin-top: 28px;
-      margin-bottom: 8px;
-      break-after: avoid;
-      font-weight: 700;
-    }
-    h2 { font-size: 1.35rem; color: #2d2d6e; border-bottom: 1px solid #d0d0e8; padding-bottom: 4px; }
-    h3 { font-size: 1.1rem;  color: #3a3a8a; }
-    h4 { font-size: 1rem;    color: #4a4a9a; }
-
-    /* ── Paragraphs & text ── */
-    p { margin: 8px 0 12px; }
-    strong { font-weight: 700; }
-    em { font-style: italic; }
-    a { color: #6c5ce7; text-decoration: underline; }
-    hr { border: none; border-top: 1px solid #d0d0e0; margin: 20px 0; }
-
-    /* ── Inline code ── */
-    code {
-      background: #f0f0fa;
-      color: #c0392b;
-      padding: 2px 6px;
+    .pdf-export-container h1 { font-size: 2rem; }
+    .pdf-export-container h2 { font-size: 1.4rem; color: #2d2d6e !important; }
+    .pdf-export-container h3 { font-size: 1.15rem; color: #3a3a8a !important; }
+    .pdf-export-container p { margin: 10px 0; }
+    .pdf-export-container code {
+      background: #f0f0fa !important;
+      color: #c0392b !important;
+      padding: 2px 5px;
       border-radius: 4px;
-      font-family: 'Courier New', 'Consolas', monospace;
-      font-size: 0.87em;
+      font-family: 'Courier New', monospace;
+      font-size: 0.88em;
     }
-
-    /* ── Code blocks ── */
-    pre {
-      background: #1e1e2e;
+    .pdf-export-container pre {
+      background: #1e1e2e !important;
       border-radius: 8px;
       padding: 16px;
-      margin: 14px 0;
       overflow: hidden;
-      break-inside: avoid;
+      margin: 16px 0;
     }
-    pre code {
-      background: transparent;
-      color: #cdd6f4;
-      font-size: 0.84em;
-      line-height: 1.55;
+    .pdf-export-container pre code {
+      background: transparent !important;
+      color: #e0e0f0 !important;
+      font-size: 0.85em;
+      line-height: 1.5;
       white-space: pre-wrap;
       word-break: break-all;
-      padding: 0;
-      border-radius: 0;
     }
-
-    /* ── Code block header (dots + lang label) ── */
-    .code-header {
+    .pdf-export-container .code-header {
       display: flex;
-      align-items: center;
       justify-content: space-between;
+      align-items: center;
       margin-bottom: 10px;
       padding-bottom: 8px;
-      border-bottom: 1px solid rgba(255,255,255,0.15);
+      border-bottom: 1px solid rgba(255,255,255,0.1) !important;
     }
-    /* The dots + lang label live inside .code-header-left */
-    .code-header-left {
-      display: flex;
-      align-items: center;
-      gap: 6px;
+    .pdf-export-container .code-header .code-lang { color: #aaa !important; font-size: 0.8em; }
+    .pdf-export-container ul, .pdf-export-container ol { padding-left: 24px; margin: 10px 0; }
+    .pdf-export-container li { margin: 4px 0; }
+    .pdf-export-container table { border-collapse: collapse; width: 100%; margin: 16px 0; }
+    .pdf-export-container th {
+      background: #e8e8f8 !important;
+      color: #1a1a2e !important;
+      padding: 8px 12px;
+      text-align: left;
+      font-weight: 600;
     }
-    .code-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
-    .code-dot.red    { background: #ff5f57; }
-    .code-dot.yellow { background: #febc2e; }
-    .code-dot.green  { background: #28c840; }
-    .code-lang { color: #999; font-size: 0.78em; font-family: monospace; }
-    /* Hide decorative header in print — wastes space and adds no info */
-    @media print { .code-header { display: none; } }
-
-    /* ── highlight.js token colors (subset, inline) ── */
-    .hljs-keyword, .hljs-selector-tag, .hljs-built_in, .hljs-name, .hljs-tag { color: #cba6f7; }
-    .hljs-string, .hljs-title, .hljs-section, .hljs-attribute, .hljs-literal,
-    .hljs-template-tag, .hljs-template-variable, .hljs-type, .hljs-addition { color: #a6e3a1; }
-    .hljs-comment, .hljs-quote, .hljs-deletion, .hljs-meta { color: #6c7086; }
-    .hljs-number, .hljs-regexp, .hljs-variable, .hljs-bullet, .hljs-link { color: #fab387; }
-    .hljs-function, .hljs-attr { color: #89b4fa; }
-    .hljs-class, .hljs-title.class_ { color: #f9e2af; }
-    .hljs-params { color: #cdd6f4; }
-    .hljs-operator, .hljs-punctuation { color: #89dceb; }
-
-    /* ── Lists ── */
-    ul, ol { padding-left: 24px; margin: 8px 0 12px; }
-    li { margin: 4px 0; }
-
-    /* ── Tables ── */
-    table { border-collapse: collapse; width: 100%; margin: 16px 0; break-inside: avoid; }
-    thead { background: #e8e8f8; }
-    th { padding: 8px 12px; text-align: left; font-weight: 600; color: #1a1a2e; border: 1px solid #d0d0e0; }
-    td { padding: 8px 12px; border: 1px solid #d0d0e0; color: #1a1a2e; }
-    tr:nth-child(even) td { background: #f6f6fc; }
-
-    /* ── Callouts & blockquotes ── */
-    blockquote, .callout {
-      border-left: 4px solid #6c5ce7;
-      background: #f0eeff;
-      color: #2a2a5a;
+    .pdf-export-container td { padding: 8px 12px; }
+    .pdf-export-container tr:nth-child(even) td { background: #f6f6fc !important; }
+    .pdf-export-container blockquote, .pdf-export-container .callout {
+      border-left: 4px solid #6c5ce7 !important;
+      background: #f0eeff !important;
+      color: #2a2a5a !important;
       padding: 12px 16px;
-      margin: 14px 0;
+      margin: 16px 0;
       border-radius: 0 8px 8px 0;
-      break-inside: avoid;
     }
-    .callout-title { font-weight: 700; margin-bottom: 6px; }
-    .callout-note      { border-color: #0ea5e9; background: #e0f2fe; color: #0c4a6e; }
-    .callout-tip       { border-color: #22c55e; background: #dcfce7; color: #14532d; }
-    .callout-warning   { border-color: #f59e0b; background: #fef9c3; color: #713f12; }
-    .callout-caution   { border-color: #ef4444; background: #fee2e2; color: #7f1d1d; }
-    .callout-important { border-color: #8b5cf6; background: #ede9fe; color: #3b0764; }
+    .pdf-export-container strong { color: #1a1a2e !important; font-weight: 700; }
+    .pdf-export-container a { color: #6c5ce7 !important; text-decoration: underline; }
+    .pdf-export-container hr { border-color: #d0d0e0 !important; }
+  `;
+  document.head.appendChild(pdfStyle);
 
-    /* ── Print-only: hide nothing (everything is already clean) ── */
-    @media print {
-      body { padding: 0; }
-      pre { break-inside: avoid; }
-    }
-  </style>
-</head>
-<body>
-  <div class="pdf-cover">
-    <h1>${activeNote.title}</h1>
-    <div class="pdf-meta">
-      <strong>Language:</strong> ${activeNote.language} &nbsp;|&nbsp;
-      <strong>Sections:</strong> ${activeNote.sections} &nbsp;|&nbsp;
-      <strong>Source:</strong> ${activeNote.builtin ? 'Built-in Reference' : 'User Uploaded'}
+  pdfContainer.innerHTML = `
+    <h1 style="font-size: 2.2rem; margin-bottom: 8px; color: #1a1a2e; font-family: sans-serif; font-weight: 800;">${activeNote.title}</h1>
+    <div style="font-size: 0.95rem; color: #546E7A; margin-bottom: 24px; border-bottom: 2px solid #e0e0ef; padding-bottom: 12px; font-family: sans-serif;">
+      <strong>Language:</strong> ${activeNote.language} | <strong>Sections:</strong> ${activeNote.sections} | <strong>Source:</strong> ${activeNote.builtin ? 'Built-in Reference' : 'User Uploaded'}
     </div>
-  </div>
-  ${contentClone.innerHTML}
-</body>
-</html>`;
+    <div class="note-viewer-content" style="font-family: sans-serif;">
+      ${viewerContent.innerHTML}
+    </div>
+  `;
 
-  // Open the print window
-  const printWin = window.open('', '_blank', 'width=900,height=700');
-  if (!printWin) {
-    showToast('⚠ Allow pop-ups for this site, then try again.', 'error');
-    return;
-  }
+  // Clean up code block copy buttons inside the PDF
+  pdfContainer.querySelectorAll('.code-copy-btn').forEach(btn => btn.remove());
 
-  printWin.document.open();
-  printWin.document.write(printHTML);
-  printWin.document.close();
+  // Append to DOM and wait two animation frames so the browser fully renders
+  // the element (resolves fonts, layout, computed styles) before html2canvas captures it.
+  wrapper.appendChild(pdfContainer);
+  document.body.appendChild(wrapper);
 
-  // Wait for the window to fully render before triggering print.
-  // 'load' fires after all inline resources are ready.
-  printWin.addEventListener('load', () => {
-    // Small delay so fonts/layout settle before the dialog opens
-    setTimeout(() => {
-      printWin.focus();
-      printWin.print();
-      // Close the helper window after the user dismisses the dialog
-      printWin.addEventListener('afterprint', () => printWin.close());
-    }, 400);
+  const opt = {
+    margin: [15, 15, 15, 15],
+    filename: `${activeNote.title.toLowerCase().replace(/[^a-z0-9]+/g, '_')}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: {
+      scale: 2,
+      useCORS: true,
+      logging: false,
+      // ── FIX: Tell html2canvas the intended render width so layout matches
+      // the 800px container regardless of the actual browser window size.
+      windowWidth: 800,
+      scrollY: 0,
+      scrollX: 0,
+      backgroundColor: '#ffffff'
+    },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+
+  showToast('Generating PDF...', 'info');
+
+  // Double rAF: first frame paints the element, second confirms layout is stable.
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      html2pdf().set(opt).from(pdfContainer).save()
+        .then(() => {
+          showToast('PDF downloaded successfully!', 'success');
+        })
+        .catch(err => {
+          console.error('PDF generation error:', err);
+          showToast('Failed to generate PDF', 'error');
+        })
+        .finally(() => {
+          wrapper.remove();
+          pdfStyle.remove();
+          downloadPdfBtn.classList.remove('loading');
+          downloadPdfBtn.innerHTML = originalText;
+        });
+    });
   });
-
-  showToast('Print dialog opened — choose "Save as PDF"', 'success');
 });
 
 // ── Initialize ──
