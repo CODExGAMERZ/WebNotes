@@ -509,21 +509,15 @@ function buildTOC() {
     _tocObserver = null;
   }
 
-  // Only use h2 headings — h3 items (numbered sub-sections, "Practice Questions",
-  // "Real-World Analogy") repeat across every section and make the TOC unreadable.
-  // h2 gives one entry per major section which is exactly what a TOC is for.
-  const headings = Array.from(viewerContent.querySelectorAll('h2'));
+  // Build TOC: h2 as top-level entries, h3s nested underneath their parent h2.
+  const allHeadings = Array.from(viewerContent.querySelectorAll('h2, h3'));
+  const headings    = allHeadings; // scroll tracker uses all levels
 
-  // Deduplicate: if the same label appears more than once, append a counter so
-  // each TOC link is distinct and the active-highlight logic stays correct.
-  const seenLabels = {};
-  headings.forEach(h => {
-    const li = document.createElement('li');
+  const makeLink = (h) => {
     const a = document.createElement('a');
     a.href = `#${h.id}`;
-    const label = h.textContent.trim();
-    seenLabels[label] = (seenLabels[label] || 0) + 1;
-    a.textContent = seenLabels[label] > 1 ? `${label} (${seenLabels[label]})` : label;
+    a.textContent = h.textContent.trim();
+    if (h.tagName === 'H3') a.classList.add('toc-h3');
     a.addEventListener('click', (e) => {
       e.preventDefault();
       h.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -533,8 +527,25 @@ function buildTOC() {
         document.body.style.overflow = '';
       }
     });
-    li.appendChild(a);
-    tocList.appendChild(li);
+    return a;
+  };
+
+  let currentSubList = null; // the <ul> of h3s under the current h2
+
+  allHeadings.forEach(h => {
+    if (h.tagName === 'H2') {
+      const li = document.createElement('li');
+      li.appendChild(makeLink(h));
+      // Fresh sub-list for any h3s that follow this h2
+      currentSubList = document.createElement('ul');
+      currentSubList.className = 'toc-sublist';
+      li.appendChild(currentSubList);
+      tocList.appendChild(li);
+    } else if (h.tagName === 'H3' && currentSubList) {
+      const li = document.createElement('li');
+      li.appendChild(makeLink(h));
+      currentSubList.appendChild(li);
+    }
   });
 
   // ── Active TOC highlighting on scroll ──
