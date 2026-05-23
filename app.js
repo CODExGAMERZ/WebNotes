@@ -796,184 +796,182 @@ function renderExistingUploads() {
 }
 
 // ── PDF Download Logic ──
+// WHY from(string) and not from(element):
+//   html2pdf().from(element) positions the element itself using its existing
+//   DOM geometry. If that element is off-screen (translateX, negative left, etc.)
+//   html2canvas reads a blank viewport rect → blank PDF.
+//   from(string) makes html2pdf create and manage its OWN container, appending
+//   it at body-level with correct geometry, so html2canvas always gets a
+//   visible, renderable element regardless of what the page is doing.
+//
+// WHY inline styles and not a <style> tag:
+//   html2canvas resolves styles by reading computed values. External/CDN
+//   stylesheets (highlight.js atom-one-dark) can taint the canvas on some
+//   origins (localhost in particular), causing toDataURL() to throw a
+//   SecurityError → blank PDF. With every colour baked in as an inline style
+//   attribute there is zero dependency on external CSS and zero CORS exposure.
 downloadPdfBtn.addEventListener('click', () => {
   if (!activeNote) return;
 
-  downloadPdfBtn.classList.add('loading');
-  const originalText = downloadPdfBtn.innerHTML;
+  downloadPdfBtn.disabled = true;
+  const originalHTML = downloadPdfBtn.innerHTML;
   downloadPdfBtn.innerHTML = `
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="spinner" style="margin: 0; display: inline-block; width: 14px; height: 14px; border-width: 2px;"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg>
-    Generating PDF...
-  `;
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2" style="display:inline-block;vertical-align:middle;
+         margin-right:6px;animation:spin 1s linear infinite;">
+      <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83
+               M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+    </svg>Generating…`;
 
-  // ── FIX: Use transform to move wrapper off-screen instead of z-index: -9999.
-  // html2canvas cannot capture elements that are behind other elements (z-index < 0
-  // falls behind body::before), causing all-blank pages. transform: translateX(-110%)
-  // keeps the element fully rendered and capturable while invisible to the user.
-  const wrapper = document.createElement('div');
-  wrapper.style.cssText = `
-    position: fixed;
-    top: 0;
-    left: 0;
-    transform: translateX(-110%);
-    width: 800px;
-    z-index: 9999;
-    overflow: visible;
-    pointer-events: none;
-    background: #ffffff;
-  `;
+  // ── 1. Clone rendered content, strip interactive chrome ──
+  const clone = viewerContent.cloneNode(true);
+  clone.querySelectorAll('.code-copy-btn, .code-header').forEach(el => el.remove());
 
-  const pdfContainer = document.createElement('div');
-  pdfContainer.className = 'pdf-export-container';
-  pdfContainer.style.cssText = `
-    position: relative;
-    width: 100%;
-    background: #ffffff;
-    color: #1a1a2e;
-    padding: 20px;
-    box-sizing: border-box;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 15px;
-    line-height: 1.7;
-  `;
-
-  // Inject a scoped style block that forces light-mode colors for all
-  // elements inside the PDF container, overriding any inherited dark-theme
-  // CSS variables so html2canvas captures readable content.
-  const pdfStyle = document.createElement('style');
-  pdfStyle.textContent = `
-    .pdf-export-container, .pdf-export-container * {
-      color: #1a1a2e !important;
-      background-color: transparent !important;
-      border-color: #d0d0e0 !important;
-    }
-    .pdf-export-container h1, .pdf-export-container h2,
-    .pdf-export-container h3, .pdf-export-container h4 {
-      color: #1a1a2e !important;
-      border-bottom: 1px solid #d0d0e0;
-      padding-bottom: 6px;
-      margin-top: 24px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    }
-    .pdf-export-container h1 { font-size: 2rem; }
-    .pdf-export-container h2 { font-size: 1.4rem; color: #2d2d6e !important; }
-    .pdf-export-container h3 { font-size: 1.15rem; color: #3a3a8a !important; }
-    .pdf-export-container p { margin: 10px 0; }
-    .pdf-export-container code {
-      background: #f0f0fa !important;
-      color: #c0392b !important;
-      padding: 2px 5px;
-      border-radius: 4px;
-      font-family: 'Courier New', monospace;
-      font-size: 0.88em;
-    }
-    .pdf-export-container pre {
-      background: #1e1e2e !important;
-      border-radius: 8px;
-      padding: 16px;
-      overflow: hidden;
-      margin: 16px 0;
-    }
-    .pdf-export-container pre code {
-      background: transparent !important;
-      color: #e0e0f0 !important;
-      font-size: 0.85em;
-      line-height: 1.5;
-      white-space: pre-wrap;
-      word-break: break-all;
-    }
-    .pdf-export-container .code-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid rgba(255,255,255,0.1) !important;
-    }
-    .pdf-export-container .code-header .code-lang { color: #aaa !important; font-size: 0.8em; }
-    .pdf-export-container ul, .pdf-export-container ol { padding-left: 24px; margin: 10px 0; }
-    .pdf-export-container li { margin: 4px 0; }
-    .pdf-export-container table { border-collapse: collapse; width: 100%; margin: 16px 0; }
-    .pdf-export-container th {
-      background: #e8e8f8 !important;
-      color: #1a1a2e !important;
-      padding: 8px 12px;
-      text-align: left;
-      font-weight: 600;
-    }
-    .pdf-export-container td { padding: 8px 12px; }
-    .pdf-export-container tr:nth-child(even) td { background: #f6f6fc !important; }
-    .pdf-export-container blockquote, .pdf-export-container .callout {
-      border-left: 4px solid #6c5ce7 !important;
-      background: #f0eeff !important;
-      color: #2a2a5a !important;
-      padding: 12px 16px;
-      margin: 16px 0;
-      border-radius: 0 8px 8px 0;
-    }
-    .pdf-export-container strong { color: #1a1a2e !important; font-weight: 700; }
-    .pdf-export-container a { color: #6c5ce7 !important; text-decoration: underline; }
-    .pdf-export-container hr { border-color: #d0d0e0 !important; }
-  `;
-  document.head.appendChild(pdfStyle);
-
-  pdfContainer.innerHTML = `
-    <h1 style="font-size: 2.2rem; margin-bottom: 8px; color: #1a1a2e; font-family: sans-serif; font-weight: 800;">${activeNote.title}</h1>
-    <div style="font-size: 0.95rem; color: #546E7A; margin-bottom: 24px; border-bottom: 2px solid #e0e0ef; padding-bottom: 12px; font-family: sans-serif;">
-      <strong>Language:</strong> ${activeNote.language} | <strong>Sections:</strong> ${activeNote.sections} | <strong>Source:</strong> ${activeNote.builtin ? 'Built-in Reference' : 'User Uploaded'}
-    </div>
-    <div class="note-viewer-content" style="font-family: sans-serif;">
-      ${viewerContent.innerHTML}
-    </div>
-  `;
-
-  // Clean up code block copy buttons inside the PDF
-  pdfContainer.querySelectorAll('.code-copy-btn').forEach(btn => btn.remove());
-
-  // Append to DOM and wait two animation frames so the browser fully renders
-  // the element (resolves fonts, layout, computed styles) before html2canvas captures it.
-  wrapper.appendChild(pdfContainer);
-  document.body.appendChild(wrapper);
-
-  const opt = {
-    margin: [15, 15, 15, 15],
-    filename: `${activeNote.title.toLowerCase().replace(/[^a-z0-9]+/g, '_')}.pdf`,
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: {
-      scale: 2,
-      useCORS: true,
-      logging: false,
-      // ── FIX: Tell html2canvas the intended render width so layout matches
-      // the 800px container regardless of the actual browser window size.
-      windowWidth: 800,
-      scrollY: 0,
-      scrollX: 0,
-      backgroundColor: '#ffffff'
-    },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  // ── 2. Inline highlight.js token colours ──
+  // Replaces the CDN stylesheet dependency with direct colour values on each span.
+  const TOKEN_COLORS = {
+    'hljs-keyword':      '#c792ea', 'hljs-selector-tag': '#c792ea',
+    'hljs-built_in':     '#c792ea', 'hljs-name':         '#c792ea',
+    'hljs-tag':          '#c792ea',
+    'hljs-string':       '#c3e88d', 'hljs-title':        '#c3e88d',
+    'hljs-section':      '#c3e88d', 'hljs-attribute':    '#c3e88d',
+    'hljs-literal':      '#c3e88d', 'hljs-addition':     '#c3e88d',
+    'hljs-type':         '#c3e88d',
+    'hljs-comment':      '#546e7a', 'hljs-quote':        '#546e7a',
+    'hljs-deletion':     '#546e7a', 'hljs-meta':         '#546e7a',
+    'hljs-number':       '#f78c6c', 'hljs-regexp':       '#f78c6c',
+    'hljs-variable':     '#f78c6c', 'hljs-bullet':       '#f78c6c',
+    'hljs-link':         '#f78c6c',
+    'hljs-function':     '#82aaff', 'hljs-attr':         '#82aaff',
+    'hljs-class':        '#ffcb6b',
+    'hljs-params':       '#e0e0ef',
+    'hljs-operator':     '#89ddff', 'hljs-punctuation':  '#89ddff',
   };
+  clone.querySelectorAll('[class]').forEach(el => {
+    const match = [...el.classList].find(c => TOKEN_COLORS[c]);
+    if (match) el.style.color = TOKEN_COLORS[match];
+  });
 
-  showToast('Generating PDF...', 'info');
+  // ── 3. Inline all block-level styles ──
 
-  // Double rAF: first frame paints the element, second confirms layout is stable.
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      html2pdf().set(opt).from(pdfContainer).save()
-        .then(() => {
-          showToast('PDF downloaded successfully!', 'success');
-        })
-        .catch(err => {
-          console.error('PDF generation error:', err);
-          showToast('Failed to generate PDF', 'error');
-        })
-        .finally(() => {
-          wrapper.remove();
-          pdfStyle.remove();
-          downloadPdfBtn.classList.remove('loading');
-          downloadPdfBtn.innerHTML = originalText;
-        });
+  // pre (code blocks)
+  clone.querySelectorAll('pre').forEach(pre => {
+    Object.assign(pre.style, {
+      background: '#1a1a2e', borderRadius: '8px', padding: '14px 16px',
+      margin: '14px 0', overflow: 'hidden', pageBreakInside: 'avoid',
+      border: '1px solid rgba(255,255,255,0.07)',
     });
   });
+  // code inside pre
+  clone.querySelectorAll('pre code').forEach(code => {
+    Object.assign(code.style, {
+      background: 'transparent', color: '#e0e0ef', fontSize: '0.83em',
+      lineHeight: '1.6', whiteSpace: 'pre-wrap', wordBreak: 'break-all',
+      fontFamily: "'Courier New', Consolas, monospace", padding: '0',
+    });
+  });
+  // inline code
+  clone.querySelectorAll('code').forEach(code => {
+    if (!code.closest('pre')) Object.assign(code.style, {
+      background: '#f0f0fa', color: '#c0392b', padding: '2px 5px',
+      borderRadius: '4px', fontFamily: "'Courier New', Consolas, monospace",
+      fontSize: '0.87em',
+    });
+  });
+
+  // headings
+  const H_COLOR = { H1:'#1a1a2e', H2:'#2d2d6e', H3:'#3a3a8a', H4:'#4a4a9a' };
+  clone.querySelectorAll('h1,h2,h3,h4,h5,h6').forEach(h => {
+    Object.assign(h.style, {
+      color: H_COLOR[h.tagName] || '#1a1a2e',
+      fontFamily: 'system-ui,-apple-system,sans-serif',
+      fontWeight: '700', marginTop: '22px', marginBottom: '6px',
+    });
+    if (h.tagName === 'H2') {
+      h.style.borderBottom = '1px solid #d0d0e8';
+      h.style.paddingBottom = '4px';
+    }
+  });
+
+  // paragraphs / lists
+  clone.querySelectorAll('p').forEach(p => {
+    p.style.color = '#1a1a2e'; p.style.margin = '8px 0 12px';
+  });
+  clone.querySelectorAll('li').forEach(li => { li.style.color = '#1a1a2e'; });
+  clone.querySelectorAll('a').forEach(a => { a.style.color = '#6c5ce7'; });
+  clone.querySelectorAll('strong,b').forEach(s => {
+    s.style.fontWeight = '700'; s.style.color = 'inherit';
+  });
+  clone.querySelectorAll('hr').forEach(hr => { hr.style.borderColor = '#d0d0e0'; });
+
+  // blockquotes / callouts
+  clone.querySelectorAll('blockquote,.callout').forEach(el => {
+    Object.assign(el.style, {
+      borderLeft: '4px solid #6c5ce7', background: '#f0eeff',
+      color: '#2a2a5a', padding: '12px 16px', margin: '12px 0',
+      borderRadius: '0 8px 8px 0',
+    });
+  });
+
+  // tables
+  clone.querySelectorAll('table').forEach(t => {
+    t.style.borderCollapse = 'collapse'; t.style.width = '100%'; t.style.margin = '14px 0';
+  });
+  clone.querySelectorAll('th').forEach(th => Object.assign(th.style, {
+    background: '#e8e8f8', color: '#1a1a2e', padding: '7px 11px',
+    border: '1px solid #d0d0e0', fontWeight: '600', textAlign: 'left',
+  }));
+  clone.querySelectorAll('td').forEach(td => Object.assign(td.style, {
+    padding: '7px 11px', border: '1px solid #d0d0e0', color: '#1a1a2e',
+  }));
+
+  // ── 4. Build self-contained HTML string ──
+  // html2pdf manages positioning of the container it creates from this string,
+  // so there are no viewport/transform/off-screen issues.
+  const coverHTML = `
+    <div style="border-bottom:3px solid #6c5ce7;padding-bottom:14px;margin-bottom:24px;">
+      <h1 style="font-size:2rem;font-weight:800;color:#1a1a2e;margin:0 0 6px;
+                 font-family:system-ui,-apple-system,sans-serif;">${activeNote.title}</h1>
+      <div style="font-size:0.87rem;color:#546e7a;font-family:sans-serif;">
+        <strong style="color:#1a1a2e;">Language:</strong> ${activeNote.language}&nbsp;|&nbsp;
+        <strong style="color:#1a1a2e;">Sections:</strong> ${activeNote.sections}&nbsp;|&nbsp;
+        <strong style="color:#1a1a2e;">Source:</strong> ${activeNote.builtin ? 'Built-in Reference' : 'User Uploaded'}
+      </div>
+    </div>`;
+
+  const htmlString = `
+    <div style="width:780px;padding:28px 32px;background:#ffffff;color:#1a1a2e;
+                font-family:system-ui,-apple-system,'Segoe UI',sans-serif;
+                font-size:14px;line-height:1.75;box-sizing:border-box;">
+      ${coverHTML}
+      ${clone.innerHTML}
+    </div>`;
+
+  // ── 5. Generate & download ──
+  showToast('Building PDF…', 'info');
+
+  html2pdf().set({
+    margin:      [10, 0, 10, 0],   // top/bottom only; left/right handled by container padding
+    filename:    `${activeNote.title.toLowerCase().replace(/[^a-z0-9]+/g, '_')}.pdf`,
+    image:       { type: 'jpeg', quality: 0.97 },
+    html2canvas: {
+      scale:           2,
+      useCORS:         true,
+      allowTaint:      true,
+      logging:         false,
+      backgroundColor: '#ffffff',
+    },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+  }).from(htmlString, 'string').save()
+    .then(() => showToast('✅ PDF downloaded!', 'success'))
+    .catch(err => {
+      console.error('PDF error:', err);
+      showToast('PDF generation failed — see console for details.', 'error');
+    })
+    .finally(() => {
+      downloadPdfBtn.disabled = false;
+      downloadPdfBtn.innerHTML = originalHTML;
+    });
 });
 
 // ── Initialize ──
