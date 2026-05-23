@@ -1,19 +1,27 @@
 # Ignore everything
 *
 
-# Allow these files
+# Allow folder traversal
+!*/
+
+# Keep repository essentials
 !.gitignore
 !README.md
+
+# Main website files
 !index.html
 !index.css
+!carousel.css
+
+# JavaScript
 !app.js
+!supabase-config.js
 !notes-content.js
+
+# Markdown notes
 !Python_Reference_Notes.md
 !Java_OOP_Reference_Notes.md
 !C_Reference_Notes_DSA.md
-
-# Allow git to read folders
-!*/
 
 # Ignore unwanted folders
 recordings/
@@ -21,16 +29,16 @@ node_modules/
 dist/
 build/
 
-# OS / editor files
-.DS_Store
-Thumbs.db
-.vscode/
-.idea/
-
-# Optional
+# Ignore configs/scripts
+package.json
 package-lock.json
 netlify.toml
 start.bat
 start.sh
 .nojekyll
-]
+
+# Editor/system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
