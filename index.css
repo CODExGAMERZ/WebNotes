@@ -33,9 +33,31 @@
   --accent-info: #74b9ff;
 
   --gradient-hero: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 50%, #00cec9 100%);
-  --gradient-card-python: linear-gradient(135deg, #306998 0%, #FFD43B 100%);
-  --gradient-card-java: linear-gradient(135deg, #f89820 0%, #e76f00 100%);
-  --gradient-card-c: linear-gradient(135deg, #00599C 0%, #659AD2 100%);
+  --gradient-card-python:     linear-gradient(135deg, #306998 0%, #FFD43B 100%);
+  --gradient-card-java:       linear-gradient(135deg, #f89820 0%, #e76f00 100%);
+  --gradient-card-c:          linear-gradient(135deg, #00599C 0%, #659AD2 100%);
+  --gradient-card-js:         linear-gradient(135deg, #F7DF1E 0%, #f0c000 100%);
+  --gradient-card-ts:         linear-gradient(135deg, #3178C6 0%, #235A97 100%);
+  --gradient-card-rust:       linear-gradient(135deg, #CE4A2E 0%, #8B3523 100%);
+  --gradient-card-go:         linear-gradient(135deg, #00AED8 0%, #007D9C 100%);
+  --gradient-card-cpp:        linear-gradient(135deg, #004482 0%, #659AD2 100%);
+  --gradient-card-kotlin:     linear-gradient(135deg, #7F52FF 0%, #E24462 100%);
+  --gradient-card-web:        linear-gradient(135deg, #E34C26 0%, #264DE4 100%);
+  --gradient-card-sql:        linear-gradient(135deg, #336791 0%, #00758F 100%);
+  --gradient-card-shell:      linear-gradient(135deg, #2d2d2d 0%, #4EAA25 100%);
+  --gradient-card-swift:      linear-gradient(135deg, #F05138 0%, #F4843C 100%);
+  --gradient-card-php:        linear-gradient(135deg, #777BB4 0%, #ADB2D4 100%);
+  --gradient-card-ruby:       linear-gradient(135deg, #CC342D 0%, #FF5555 100%);
+  --gradient-card-dart:       linear-gradient(135deg, #0175C2 0%, #00B4AB 100%);
+  --gradient-card-scala:      linear-gradient(135deg, #DC322F 0%, #E05C59 100%);
+  --gradient-card-haskell:    linear-gradient(135deg, #5D4F85 0%, #453A62 100%);
+  --gradient-card-r:          linear-gradient(135deg, #276DC2 0%, #2B7BB9 100%);
+  --gradient-card-lua:        linear-gradient(135deg, #000080 0%, #4040CC 100%);
+  --gradient-card-elixir:     linear-gradient(135deg, #6B21A8 0%, #9333EA 100%);
+  --gradient-card-devops:     linear-gradient(135deg, #1D63ED 0%, #0DB7D4 100%);
+  --gradient-card-ml:         linear-gradient(135deg, #F97316 0%, #EAB308 100%);
+  --gradient-card-csharp:     linear-gradient(135deg, #68217A 0%, #9B4FBB 100%);
+  --gradient-card-asm:        linear-gradient(135deg, #374151 0%, #6B7280 100%);
   --gradient-glow: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(108, 92, 231, 0.12), transparent 40%);
 
   --border-subtle: rgba(255, 255, 255, 0.06);
@@ -595,6 +617,94 @@ a:hover { color: var(--accent-secondary); }
 .note-card.uploaded::before { background: rgba(108, 92, 231, 0.9); }
 .note-card.uploaded::after  { background: rgba(0, 206, 201, 0.75); }
 
+/* JavaScript — yellow / dark */
+.note-card.js-lang::before  { background: rgba(247, 223, 30, 0.85); }
+.note-card.js-lang::after   { background: rgba(50, 51, 48, 0.75); }
+
+/* TypeScript — blue */
+.note-card.ts-lang::before  { background: rgba(49, 120, 198, 0.9); }
+.note-card.ts-lang::after   { background: rgba(35, 90, 151, 0.75); }
+
+/* Rust — burnt orange */
+.note-card.rust-lang::before { background: rgba(206, 74, 46, 0.9); }
+.note-card.rust-lang::after  { background: rgba(139, 53, 35, 0.75); }
+
+/* Go — cyan */
+.note-card.go-lang::before  { background: rgba(0, 174, 216, 0.9); }
+.note-card.go-lang::after   { background: rgba(0, 125, 156, 0.75); }
+
+/* C++ — deep navy / steel */
+.note-card.cpp-lang::before { background: rgba(0, 68, 130, 0.9); }
+.note-card.cpp-lang::after  { background: rgba(101, 154, 210, 0.75); }
+
+/* Kotlin — vivid purple / coral */
+.note-card.kotlin-lang::before { background: rgba(127, 82, 255, 0.9); }
+.note-card.kotlin-lang::after  { background: rgba(226, 68, 98, 0.75); }
+
+/* Web / HTML+CSS — orange / blue */
+.note-card.web-lang::before { background: rgba(227, 76, 38, 0.9); }
+.note-card.web-lang::after  { background: rgba(38, 77, 228, 0.75); }
+
+/* SQL / Database — postgres blue / teal */
+.note-card.sql-lang::before { background: rgba(51, 103, 145, 0.9); }
+.note-card.sql-lang::after  { background: rgba(0, 117, 143, 0.75); }
+
+/* Shell / Bash — terminal dark / green */
+.note-card.shell-lang::before { background: rgba(45, 45, 45, 0.95); }
+.note-card.shell-lang::after  { background: rgba(78, 170, 37, 0.75); }
+
+/* Swift — orange flame */
+.note-card.swift-lang::before { background: rgba(240, 81, 56, 0.9); }
+.note-card.swift-lang::after  { background: rgba(244, 132, 60, 0.75); }
+
+/* PHP — muted purple */
+.note-card.php-lang::before { background: rgba(119, 123, 180, 0.9); }
+.note-card.php-lang::after  { background: rgba(173, 178, 212, 0.75); }
+
+/* Ruby — ruby red */
+.note-card.ruby-lang::before { background: rgba(204, 52, 45, 0.9); }
+.note-card.ruby-lang::after  { background: rgba(255, 85, 85, 0.75); }
+
+/* Dart / Flutter — sky blue / teal */
+.note-card.dart-lang::before { background: rgba(1, 117, 194, 0.9); }
+.note-card.dart-lang::after  { background: rgba(0, 180, 171, 0.75); }
+
+/* Scala — vermilion */
+.note-card.scala-lang::before { background: rgba(220, 50, 47, 0.9); }
+.note-card.scala-lang::after  { background: rgba(224, 92, 89, 0.75); }
+
+/* Haskell — deep purple */
+.note-card.haskell-lang::before { background: rgba(93, 79, 133, 0.9); }
+.note-card.haskell-lang::after  { background: rgba(69, 58, 98, 0.75); }
+
+/* R — royal blue */
+.note-card.r-lang::before { background: rgba(39, 109, 194, 0.9); }
+.note-card.r-lang::after  { background: rgba(43, 123, 185, 0.75); }
+
+/* Lua — navy / indigo */
+.note-card.lua-lang::before { background: rgba(0, 0, 128, 0.9); }
+.note-card.lua-lang::after  { background: rgba(64, 64, 204, 0.75); }
+
+/* Elixir — amethyst */
+.note-card.elixir-lang::before { background: rgba(107, 33, 168, 0.9); }
+.note-card.elixir-lang::after  { background: rgba(147, 51, 234, 0.75); }
+
+/* DevOps / Docker — docker blue / teal */
+.note-card.devops-lang::before { background: rgba(29, 99, 237, 0.9); }
+.note-card.devops-lang::after  { background: rgba(13, 183, 212, 0.75); }
+
+/* ML / AI — amber / orange */
+.note-card.ml-lang::before { background: rgba(249, 115, 22, 0.9); }
+.note-card.ml-lang::after  { background: rgba(234, 179, 8, 0.75); }
+
+/* C# / .NET — microsoft purple */
+.note-card.csharp-lang::before { background: rgba(104, 33, 122, 0.9); }
+.note-card.csharp-lang::after  { background: rgba(155, 79, 187, 0.75); }
+
+/* Assembly — steel gray */
+.note-card.asm-lang::before { background: rgba(55, 65, 81, 0.9); }
+.note-card.asm-lang::after  { background: rgba(107, 114, 128, 0.75); }
+
 /* ── Hover state ── */
 .note-card:hover {
   transform: translateY(-10px) scale(1.025);
@@ -639,6 +749,182 @@ a:hover { color: var(--accent-secondary); }
     12px 0 40px rgba(0, 206, 201, 0.3);
 }
 
+.note-card.js-lang:hover {
+  border-color: rgba(247, 223, 30, 0.6);
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.5),
+    -12px 0 40px rgba(247, 223, 30, 0.35),
+    12px 0 40px rgba(50, 51, 48, 0.25);
+}
+
+.note-card.ts-lang:hover {
+  border-color: rgba(49, 120, 198, 0.7);
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.5),
+    -12px 0 40px rgba(49, 120, 198, 0.4),
+    12px 0 40px rgba(35, 90, 151, 0.3);
+}
+
+.note-card.rust-lang:hover {
+  border-color: rgba(206, 74, 46, 0.7);
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.5),
+    -12px 0 40px rgba(206, 74, 46, 0.4),
+    12px 0 40px rgba(139, 53, 35, 0.3);
+}
+
+.note-card.go-lang:hover {
+  border-color: rgba(0, 174, 216, 0.7);
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.5),
+    -12px 0 40px rgba(0, 174, 216, 0.4),
+    12px 0 40px rgba(0, 125, 156, 0.3);
+}
+
+.note-card.cpp-lang:hover {
+  border-color: rgba(0, 68, 130, 0.7);
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.5),
+    -12px 0 40px rgba(0, 68, 130, 0.4),
+    12px 0 40px rgba(101, 154, 210, 0.3);
+}
+
+.note-card.kotlin-lang:hover {
+  border-color: rgba(127, 82, 255, 0.7);
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.5),
+    -12px 0 40px rgba(127, 82, 255, 0.4),
+    12px 0 40px rgba(226, 68, 98, 0.3);
+}
+
+.note-card.web-lang:hover {
+  border-color: rgba(227, 76, 38, 0.7);
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.5),
+    -12px 0 40px rgba(227, 76, 38, 0.4),
+    12px 0 40px rgba(38, 77, 228, 0.3);
+}
+
+.note-card.sql-lang:hover {
+  border-color: rgba(51, 103, 145, 0.7);
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.5),
+    -12px 0 40px rgba(51, 103, 145, 0.4),
+    12px 0 40px rgba(0, 117, 143, 0.3);
+}
+
+.note-card.shell-lang:hover {
+  border-color: rgba(78, 170, 37, 0.7);
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.5),
+    -12px 0 40px rgba(45, 45, 45, 0.8),
+    12px 0 40px rgba(78, 170, 37, 0.4);
+}
+
+.note-card.swift-lang:hover {
+  border-color: rgba(240, 81, 56, 0.7);
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.5),
+    -12px 0 40px rgba(240, 81, 56, 0.4),
+    12px 0 40px rgba(244, 132, 60, 0.3);
+}
+
+.note-card.php-lang:hover {
+  border-color: rgba(119, 123, 180, 0.7);
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.5),
+    -12px 0 40px rgba(119, 123, 180, 0.4),
+    12px 0 40px rgba(173, 178, 212, 0.3);
+}
+
+.note-card.ruby-lang:hover {
+  border-color: rgba(204, 52, 45, 0.7);
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.5),
+    -12px 0 40px rgba(204, 52, 45, 0.4),
+    12px 0 40px rgba(255, 85, 85, 0.3);
+}
+
+.note-card.dart-lang:hover {
+  border-color: rgba(1, 117, 194, 0.7);
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.5),
+    -12px 0 40px rgba(1, 117, 194, 0.4),
+    12px 0 40px rgba(0, 180, 171, 0.3);
+}
+
+.note-card.scala-lang:hover {
+  border-color: rgba(220, 50, 47, 0.7);
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.5),
+    -12px 0 40px rgba(220, 50, 47, 0.4),
+    12px 0 40px rgba(224, 92, 89, 0.3);
+}
+
+.note-card.haskell-lang:hover {
+  border-color: rgba(93, 79, 133, 0.7);
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.5),
+    -12px 0 40px rgba(93, 79, 133, 0.4),
+    12px 0 40px rgba(69, 58, 98, 0.3);
+}
+
+.note-card.r-lang:hover {
+  border-color: rgba(39, 109, 194, 0.7);
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.5),
+    -12px 0 40px rgba(39, 109, 194, 0.4),
+    12px 0 40px rgba(43, 123, 185, 0.3);
+}
+
+.note-card.lua-lang:hover {
+  border-color: rgba(64, 64, 204, 0.7);
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.5),
+    -12px 0 40px rgba(0, 0, 128, 0.5),
+    12px 0 40px rgba(64, 64, 204, 0.4);
+}
+
+.note-card.elixir-lang:hover {
+  border-color: rgba(107, 33, 168, 0.7);
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.5),
+    -12px 0 40px rgba(107, 33, 168, 0.4),
+    12px 0 40px rgba(147, 51, 234, 0.3);
+}
+
+.note-card.devops-lang:hover {
+  border-color: rgba(29, 99, 237, 0.7);
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.5),
+    -12px 0 40px rgba(29, 99, 237, 0.4),
+    12px 0 40px rgba(13, 183, 212, 0.3);
+}
+
+.note-card.ml-lang:hover {
+  border-color: rgba(249, 115, 22, 0.7);
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.5),
+    -12px 0 40px rgba(249, 115, 22, 0.4),
+    12px 0 40px rgba(234, 179, 8, 0.3);
+}
+
+.note-card.csharp-lang:hover {
+  border-color: rgba(104, 33, 122, 0.7);
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.5),
+    -12px 0 40px rgba(104, 33, 122, 0.4),
+    12px 0 40px rgba(155, 79, 187, 0.3);
+}
+
+.note-card.asm-lang:hover {
+  border-color: rgba(107, 114, 128, 0.7);
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.5),
+    -12px 0 40px rgba(55, 65, 81, 0.5),
+    12px 0 40px rgba(107, 114, 128, 0.3);
+}
+
 .note-card-banner {
   height: 140px;
   position: relative;
@@ -662,10 +948,33 @@ a:hover { color: var(--accent-secondary); }
   z-index: 1;
 }
 
-.note-card.python .note-card-banner { background: linear-gradient(135deg, rgba(48, 105, 152, 0.25), rgba(255, 212, 59, 0.12)); }
-.note-card.java .note-card-banner { background: linear-gradient(135deg, rgba(248, 152, 32, 0.25), rgba(231, 111, 0, 0.12)); }
-.note-card.c-lang .note-card-banner { background: linear-gradient(135deg, rgba(0, 89, 156, 0.25), rgba(101, 154, 210, 0.12)); }
-.note-card.uploaded .note-card-banner { background: linear-gradient(135deg, rgba(108, 92, 231, 0.25), rgba(0, 206, 201, 0.12)); }
+.note-card.python .note-card-banner   { background: linear-gradient(135deg, rgba(48,105,152,0.25),  rgba(255,212,59,0.12)); }
+.note-card.java .note-card-banner     { background: linear-gradient(135deg, rgba(248,152,32,0.25),  rgba(231,111,0,0.12)); }
+.note-card.c-lang .note-card-banner   { background: linear-gradient(135deg, rgba(0,89,156,0.25),    rgba(101,154,210,0.12)); }
+.note-card.uploaded .note-card-banner { background: linear-gradient(135deg, rgba(108,92,231,0.25),  rgba(0,206,201,0.12)); }
+.note-card.js-lang .note-card-banner  { background: linear-gradient(135deg, rgba(247,223,30,0.20),  rgba(50,51,48,0.18)); }
+.note-card.ts-lang .note-card-banner  { background: linear-gradient(135deg, rgba(49,120,198,0.25),  rgba(35,90,151,0.12)); }
+.note-card.rust-lang .note-card-banner{ background: linear-gradient(135deg, rgba(206,74,46,0.25),   rgba(139,53,35,0.12)); }
+.note-card.go-lang .note-card-banner  { background: linear-gradient(135deg, rgba(0,174,216,0.25),   rgba(0,125,156,0.12)); }
+.note-card.cpp-lang .note-card-banner { background: linear-gradient(135deg, rgba(0,68,130,0.25),    rgba(101,154,210,0.12)); }
+.note-card.kotlin-lang .note-card-banner { background: linear-gradient(135deg, rgba(127,82,255,0.25), rgba(226,68,98,0.12)); }
+.note-card.web-lang .note-card-banner { background: linear-gradient(135deg, rgba(227,76,38,0.25),   rgba(38,77,228,0.12)); }
+.note-card.sql-lang .note-card-banner { background: linear-gradient(135deg, rgba(51,103,145,0.25),  rgba(0,117,143,0.12)); }
+.note-card.shell-lang .note-card-banner { background: linear-gradient(135deg, rgba(20,20,20,0.4),   rgba(78,170,37,0.18)); }
+.note-card.swift-lang .note-card-banner { background: linear-gradient(135deg, rgba(240,81,56,0.25), rgba(244,132,60,0.12)); }
+.note-card.php-lang .note-card-banner { background: linear-gradient(135deg, rgba(119,123,180,0.25), rgba(173,178,212,0.12)); }
+.note-card.ruby-lang .note-card-banner { background: linear-gradient(135deg, rgba(204,52,45,0.25),  rgba(255,85,85,0.12)); }
+
+.note-card.dart-lang .note-card-banner    { background: linear-gradient(135deg, rgba(1,117,194,0.25),   rgba(0,180,171,0.12)); }
+.note-card.scala-lang .note-card-banner   { background: linear-gradient(135deg, rgba(220,50,47,0.25),   rgba(224,92,89,0.12)); }
+.note-card.haskell-lang .note-card-banner { background: linear-gradient(135deg, rgba(93,79,133,0.25),   rgba(69,58,98,0.12)); }
+.note-card.r-lang .note-card-banner       { background: linear-gradient(135deg, rgba(39,109,194,0.25),  rgba(43,123,185,0.12)); }
+.note-card.lua-lang .note-card-banner     { background: linear-gradient(135deg, rgba(0,0,128,0.30),     rgba(64,64,204,0.18)); }
+.note-card.elixir-lang .note-card-banner  { background: linear-gradient(135deg, rgba(107,33,168,0.25),  rgba(147,51,234,0.12)); }
+.note-card.devops-lang .note-card-banner  { background: linear-gradient(135deg, rgba(29,99,237,0.25),   rgba(13,183,212,0.12)); }
+.note-card.ml-lang .note-card-banner      { background: linear-gradient(135deg, rgba(249,115,22,0.25),  rgba(234,179,8,0.12)); }
+.note-card.csharp-lang .note-card-banner  { background: linear-gradient(135deg, rgba(104,33,122,0.25),  rgba(155,79,187,0.12)); }
+.note-card.asm-lang .note-card-banner     { background: linear-gradient(135deg, rgba(55,65,81,0.30),    rgba(107,114,128,0.18)); }
 
 .note-card-banner-icon {
   font-size: 3.8rem;
@@ -684,6 +993,7 @@ a:hover { color: var(--accent-secondary); }
   display: flex;
   flex-direction: column;
   flex: 1;
+  min-height: 190px;      /* keeps all cards the same min height regardless of content */
   position: relative;
   z-index: 1;
 }
@@ -722,6 +1032,118 @@ a:hover { color: var(--accent-secondary); }
   color: var(--accent-primary-light);
   border: 1px solid rgba(108, 92, 231, 0.3);
 }
+.note-card.js-lang .note-card-lang-badge {
+  background: rgba(247, 223, 30, 0.1);
+  color: #f0c000;
+  border: 1px solid rgba(247, 223, 30, 0.3);
+}
+.note-card.ts-lang .note-card-lang-badge {
+  background: rgba(49, 120, 198, 0.12);
+  color: #5ba4e8;
+  border: 1px solid rgba(49, 120, 198, 0.3);
+}
+.note-card.rust-lang .note-card-lang-badge {
+  background: rgba(206, 74, 46, 0.1);
+  color: #e8784e;
+  border: 1px solid rgba(206, 74, 46, 0.3);
+}
+.note-card.go-lang .note-card-lang-badge {
+  background: rgba(0, 174, 216, 0.1);
+  color: #00d4ff;
+  border: 1px solid rgba(0, 174, 216, 0.3);
+}
+.note-card.cpp-lang .note-card-lang-badge {
+  background: rgba(0, 68, 130, 0.15);
+  color: #659AD2;
+  border: 1px solid rgba(0, 68, 130, 0.4);
+}
+.note-card.kotlin-lang .note-card-lang-badge {
+  background: rgba(127, 82, 255, 0.1);
+  color: #a07bff;
+  border: 1px solid rgba(127, 82, 255, 0.3);
+}
+.note-card.web-lang .note-card-lang-badge {
+  background: rgba(227, 76, 38, 0.1);
+  color: #ff7c52;
+  border: 1px solid rgba(227, 76, 38, 0.3);
+}
+.note-card.sql-lang .note-card-lang-badge {
+  background: rgba(51, 103, 145, 0.12);
+  color: #5fa8d3;
+  border: 1px solid rgba(51, 103, 145, 0.3);
+}
+.note-card.shell-lang .note-card-lang-badge {
+  background: rgba(78, 170, 37, 0.1);
+  color: #6ecc40;
+  border: 1px solid rgba(78, 170, 37, 0.3);
+}
+.note-card.swift-lang .note-card-lang-badge {
+  background: rgba(240, 81, 56, 0.1);
+  color: #ff7a5c;
+  border: 1px solid rgba(240, 81, 56, 0.3);
+}
+.note-card.php-lang .note-card-lang-badge {
+  background: rgba(119, 123, 180, 0.12);
+  color: #a0a4d4;
+  border: 1px solid rgba(119, 123, 180, 0.3);
+}
+.note-card.ruby-lang .note-card-lang-badge {
+  background: rgba(204, 52, 45, 0.1);
+  color: #ff6b65;
+  border: 1px solid rgba(204, 52, 45, 0.3);
+}
+
+/* ── New languages ── */
+.note-card.dart-lang .note-card-lang-badge {
+  background: rgba(1, 117, 194, 0.12);
+  color: #29b6f6;
+  border: 1px solid rgba(1, 117, 194, 0.35);
+}
+.note-card.scala-lang .note-card-lang-badge {
+  background: rgba(220, 50, 47, 0.1);
+  color: #ef6c6b;
+  border: 1px solid rgba(220, 50, 47, 0.3);
+}
+.note-card.haskell-lang .note-card-lang-badge {
+  background: rgba(93, 79, 133, 0.15);
+  color: #b39ddb;
+  border: 1px solid rgba(93, 79, 133, 0.35);
+}
+.note-card.r-lang .note-card-lang-badge {
+  background: rgba(39, 109, 194, 0.12);
+  color: #64b5f6;
+  border: 1px solid rgba(39, 109, 194, 0.3);
+}
+.note-card.lua-lang .note-card-lang-badge {
+  background: rgba(64, 64, 204, 0.15);
+  color: #9fa8ff;
+  border: 1px solid rgba(64, 64, 204, 0.35);
+}
+.note-card.elixir-lang .note-card-lang-badge {
+  background: rgba(107, 33, 168, 0.15);
+  color: #ce93d8;
+  border: 1px solid rgba(107, 33, 168, 0.35);
+}
+.note-card.devops-lang .note-card-lang-badge {
+  background: rgba(29, 99, 237, 0.12);
+  color: #60a5fa;
+  border: 1px solid rgba(29, 99, 237, 0.35);
+}
+.note-card.ml-lang .note-card-lang-badge {
+  background: rgba(249, 115, 22, 0.1);
+  color: #fb923c;
+  border: 1px solid rgba(249, 115, 22, 0.3);
+}
+.note-card.csharp-lang .note-card-lang-badge {
+  background: rgba(104, 33, 122, 0.15);
+  color: #ce93d8;
+  border: 1px solid rgba(104, 33, 122, 0.35);
+}
+.note-card.asm-lang .note-card-lang-badge {
+  background: rgba(107, 114, 128, 0.12);
+  color: #9ca3af;
+  border: 1px solid rgba(107, 114, 128, 0.3);
+}
 
 .note-card-title {
   font-size: 1.25rem;
@@ -729,6 +1151,12 @@ a:hover { color: var(--accent-secondary); }
   margin-bottom: 8px;
   color: var(--text-primary);
   transition: color var(--transition-fast);
+  /* Prevent long auto-extracted titles from blowing up card height */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
 }
 
 .note-card:hover .note-card-title {
@@ -819,6 +1247,78 @@ a:hover { color: var(--accent-secondary); }
   background: var(--accent-primary);
   border-color: var(--accent-primary);
   box-shadow: 0 0 10px rgba(108, 92, 231, 0.4);
+}
+
+.note-card.js-lang:hover .note-card-arrow {
+  background: #c8b800;
+  border-color: #c8b800;
+  box-shadow: 0 0 14px rgba(247, 223, 30, 0.5);
+}
+
+.note-card.ts-lang:hover .note-card-arrow {
+  background: #3178C6;
+  border-color: #3178C6;
+  box-shadow: 0 0 14px rgba(49, 120, 198, 0.6);
+}
+
+.note-card.rust-lang:hover .note-card-arrow {
+  background: #CE4A2E;
+  border-color: #CE4A2E;
+  box-shadow: 0 0 14px rgba(206, 74, 46, 0.6);
+}
+
+.note-card.go-lang:hover .note-card-arrow {
+  background: #00AED8;
+  border-color: #00AED8;
+  box-shadow: 0 0 14px rgba(0, 174, 216, 0.6);
+}
+
+.note-card.cpp-lang:hover .note-card-arrow {
+  background: #004482;
+  border-color: #004482;
+  box-shadow: 0 0 14px rgba(0, 68, 130, 0.6);
+}
+
+.note-card.kotlin-lang:hover .note-card-arrow {
+  background: #7F52FF;
+  border-color: #7F52FF;
+  box-shadow: 0 0 14px rgba(127, 82, 255, 0.6);
+}
+
+.note-card.web-lang:hover .note-card-arrow {
+  background: #E34C26;
+  border-color: #E34C26;
+  box-shadow: 0 0 14px rgba(227, 76, 38, 0.6);
+}
+
+.note-card.sql-lang:hover .note-card-arrow {
+  background: #336791;
+  border-color: #336791;
+  box-shadow: 0 0 14px rgba(51, 103, 145, 0.6);
+}
+
+.note-card.shell-lang:hover .note-card-arrow {
+  background: #4EAA25;
+  border-color: #4EAA25;
+  box-shadow: 0 0 14px rgba(78, 170, 37, 0.6);
+}
+
+.note-card.swift-lang:hover .note-card-arrow {
+  background: #F05138;
+  border-color: #F05138;
+  box-shadow: 0 0 14px rgba(240, 81, 56, 0.6);
+}
+
+.note-card.php-lang:hover .note-card-arrow {
+  background: #777BB4;
+  border-color: #777BB4;
+  box-shadow: 0 0 14px rgba(119, 123, 180, 0.6);
+}
+
+.note-card.ruby-lang:hover .note-card-arrow {
+  background: #CC342D;
+  border-color: #CC342D;
+  box-shadow: 0 0 14px rgba(204, 52, 45, 0.6);
 }
 
 /* ── Upload Section ── */

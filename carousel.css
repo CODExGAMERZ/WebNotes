@@ -242,3 +242,103 @@
   0%, 100% { opacity: 1; }
   50%       { opacity: 0; }
 }
+
+/* ── Open Note pill — FULL COVERAGE (all card classes) ── */
+
+/* 1. Base pill */
+.note-card-open-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 13px;
+  border-radius: 20px;
+  border: 1px solid var(--border-accent);
+  background: rgba(108, 92, 231, 0.12);
+  color: var(--accent-primary-light);
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition:
+    background   0.25s ease,
+    border-color 0.25s ease,
+    color        0.25s ease,
+    box-shadow   0.25s ease,
+    transform    0.2s  ease;
+}
+
+/* 2. Shimmer sweep — always on, all cards */
+.note-card-open-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -80%;
+  width: 55%; height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(255,255,255,0.2) 50%,
+    transparent 100%
+  );
+  animation: open-btn-shimmer 2.8s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes open-btn-shimmer {
+  0%        { left: -80%;  opacity: 0; }
+  15%       { opacity: 1; }
+  55%       { left: 130%;  opacity: 1; }
+  56%, 100% { left: 130%;  opacity: 0; }
+}
+
+/* 3. Arrow bounce — always on */
+.note-card-open-btn span {
+  display: inline-block;
+  animation: open-btn-arrow 1.6s ease-in-out infinite;
+}
+@keyframes open-btn-arrow {
+  0%, 100% { transform: translateX(0);   }
+  50%       { transform: translateX(4px); }
+}
+
+/* 4. Hover base — covers ALL card types */
+.note-card:hover .note-card-open-btn {
+  background:   rgba(108, 92, 231, 0.32);
+  border-color: var(--accent-primary);
+  box-shadow:   0 0 16px rgba(108,92,231,0.45), 0 2px 8px rgba(0,0,0,0.3);
+  transform:    translateY(-2px);
+  color: #fff;
+}
+.note-card:hover .note-card-open-btn span {
+  animation: open-btn-arrow-fast 0.45s ease-in-out infinite;
+}
+@keyframes open-btn-arrow-fast {
+  0%, 100% { transform: translateX(0);   }
+  50%       { transform: translateX(5px); }
+}
+.note-card-open-btn:active {
+  transform: translateY(0) scale(0.95);
+  box-shadow: none;
+}
+
+/* 5. Per-language accent on hover — every card class */
+.note-card.python:hover     .note-card-open-btn { background: rgba(48,105,152,0.35);   border-color: #4b8bbe; box-shadow: 0 0 16px rgba(48,105,152,0.5);   color: #7ec8e3; }
+.note-card.java:hover       .note-card-open-btn { background: rgba(248,152,32,0.28);   border-color: #f89820; box-shadow: 0 0 16px rgba(248,152,32,0.45);  color: #f89820; }
+.note-card.c-lang:hover     .note-card-open-btn { background: rgba(0,89,156,0.35);     border-color: #00599C; box-shadow: 0 0 16px rgba(0,89,156,0.5);     color: #659AD2; }
+.note-card.js-lang:hover    .note-card-open-btn { background: rgba(247,223,30,0.2);    border-color: #F7DF1E; box-shadow: 0 0 16px rgba(247,223,30,0.35);  color: #F7DF1E; }
+.note-card.ts-lang:hover    .note-card-open-btn { background: rgba(49,120,198,0.3);    border-color: #3178C6; box-shadow: 0 0 16px rgba(49,120,198,0.45);  color: #7ab4e8; }
+.note-card.rust-lang:hover  .note-card-open-btn { background: rgba(206,74,46,0.3);     border-color: #CE4A2E; box-shadow: 0 0 16px rgba(206,74,46,0.45);   color: #f4a58a; }
+.note-card.go-lang:hover    .note-card-open-btn { background: rgba(0,174,216,0.28);    border-color: #00AED8; box-shadow: 0 0 16px rgba(0,174,216,0.4);    color: #00AED8; }
+.note-card.cpp-lang:hover   .note-card-open-btn { background: rgba(0,68,130,0.35);     border-color: #004482; box-shadow: 0 0 16px rgba(0,68,130,0.5);     color: #659AD2; }
+.note-card.kotlin-lang:hover .note-card-open-btn{ background: rgba(127,82,255,0.3);    border-color: #7F52FF; box-shadow: 0 0 16px rgba(127,82,255,0.45);  color: #b49dff; }
+.note-card.swift-lang:hover .note-card-open-btn { background: rgba(240,81,56,0.28);    border-color: #F05138; box-shadow: 0 0 16px rgba(240,81,56,0.4);    color: #f4a58a; }
+.note-card.ruby-lang:hover  .note-card-open-btn { background: rgba(204,52,45,0.28);    border-color: #CC342D; box-shadow: 0 0 16px rgba(204,52,45,0.4);    color: #ff8a85; }
+.note-card.php-lang:hover   .note-card-open-btn { background: rgba(119,123,180,0.3);   border-color: #777BB4; box-shadow: 0 0 16px rgba(119,123,180,0.4);  color: #adb2d4; }
+.note-card.sql-lang:hover   .note-card-open-btn { background: rgba(51,103,145,0.32);   border-color: #336791; box-shadow: 0 0 16px rgba(51,103,145,0.45);  color: #74b9ff; }
+.note-card.shell-lang:hover .note-card-open-btn { background: rgba(45,45,45,0.5);      border-color: #4EAA25; box-shadow: 0 0 16px rgba(78,170,37,0.4);    color: #4EAA25; }
+.note-card.web-lang:hover   .note-card-open-btn { background: rgba(227,76,38,0.22);    border-color: #E34C26; box-shadow: 0 0 16px rgba(38,77,228,0.4);    color: #74b9ff; }
+.note-card.ml-lang:hover    .note-card-open-btn { background: rgba(255,111,97,0.22);   border-color: #ff6f61; box-shadow: 0 0 16px rgba(255,111,97,0.4);   color: #ffb3ae; }
+.note-card.devops-lang:hover .note-card-open-btn{ background: rgba(0,150,215,0.25);    border-color: #0096d7; box-shadow: 0 0 16px rgba(0,150,215,0.4);    color: #74d0ff; }
+.note-card.dart-lang:hover  .note-card-open-btn { background: rgba(0,180,216,0.25);    border-color: #00B4D8; box-shadow: 0 0 16px rgba(0,180,216,0.4);    color: #00B4D8; }
+.note-card.csharp-lang:hover .note-card-open-btn{ background: rgba(104,33,122,0.3);    border-color: #68217a; box-shadow: 0 0 16px rgba(104,33,122,0.45);  color: #d6a8ff; }
+.note-card.uploaded:hover   .note-card-open-btn { background: rgba(108,92,231,0.35);   border-color: #6c5ce7; box-shadow: 0 0 16px rgba(108,92,231,0.5);   color: #a29bfe; }

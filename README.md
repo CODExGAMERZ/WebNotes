@@ -7,6 +7,7 @@ WebNotes is a premium, interactive client-side web application designed for orga
 ## ✨ Features
 
 ### 📖 Immersive Reading Experience
+- **Interactive 3-Card Carousel**: Browse notes using a rotating card carousel with side-card scaling, opacity dimming, custom dot indicators, and smooth sliding transitions.
 - **Centered Layout**: Cohesive reading flow centering markdown notes and the table of contents sidebar.
 - **Glassmorphism TOC Sidebar**: A semi-transparent card sidebar with active-state accent indicators that smoothly track scroll position and slide/scale into place on hover.
 - **TOC Toggle Support**: Toggle outline visibility on both desktop (collapses the grid layout to maximize reading area) and mobile (slides the navigation drawer).
@@ -24,10 +25,10 @@ Comes pre-packaged with 3 detailed reference notes:
 
 ### ⌨️ Comprehensive Keyboard Shortcuts
 - **Navigation Controls**:
-  - `Alt + H` — Scroll to the Home section (closes reader if active).
-  - `Alt + N` — Scroll to the Notes Collection (closes reader if active).
-  - `Alt + U` — Scroll to the Upload area (closes reader if active).
-  - `Alt + K` — Toggle the floating Keyboard Shortcuts Help Modal panel.
+  - `Alt + H` — Scroll to the Home section (closes reader and routes back to landing top).
+  - `Alt + N` — Scroll to the Notes Collection (closes reader and routes back to notes grid).
+  - `Alt + U` — Scroll to the Upload area (closes reader and routes back to upload dashboard).
+  - `Alt + K` — Toggle the floating glassmorphic Keyboard Shortcuts Helper panel.
 - **Search Focus**: Press `/` on the landing page to instantly scroll to and focus the search bar.
 - **Active Note Reader**:
   - `Esc` — Close the reader and return back to the notes grid.
@@ -38,10 +39,15 @@ Comes pre-packaged with 3 detailed reference notes:
 ### 🎨 Cross-Platform Monospaced Diagrams
 - **ASCII Overhaul**: All structural illustrations (JVM Memory regions, Compilation chains, String pools, and Collection hierarchies) are written in cross-platform monospaced ASCII layout grids (`+`, `-`, `|`), eliminating font-warping and visual misalignment bugs on web browsers.
 
-### ⬆️ Local Markdown Imports
+### ⬆️ Local Markdown Imports & Language Detection
 - **Drag & Drop / Select Uploads**: Drop any `.md`, `.txt`, or `.markdown` file directly into the browser.
 - **Auto-Parsing**: Automatically extracts the title from the first heading (`#`) and calculates total sections based on secondary headings (`##`).
-- **Language Detection**: Automatically assigns custom themes, cards, and icons based on file name or syntax hints.
+- **Advanced Language Detection**: Automatically analyzes filename and file contents using deep syntax keyword scoring to assign custom themes, badges, gradient headers, and hover glows. Supports **24 languages and frameworks**:
+  * *Systems & OOP*: Java, C, C++, C#, Kotlin, Swift, Scala
+  * *Scripting & Web*: Python, JavaScript, TypeScript, Ruby, PHP, Dart/Flutter, Lua, HTML/CSS
+  * *Functional*: Haskell, Elixir
+  * *Data & DevOps*: SQL/DB, R, Shell/Bash, DevOps (Docker/Kubernetes)
+  * *Low-Level & AI*: Assembly, ML/AI (TensorFlow/PyTorch)
 - **Local Persistence**: Uploaded notes are saved to `localStorage` (safely handled with error-recovery blocks) to persist between sessions.
 
 ### 💻 macOS-Style Interactive Code Blocks
@@ -86,6 +92,7 @@ Since WebNotes runs purely client-side, you can host it locally with a simple we
 WebNotes/
 ├── index.html                  # Main application structure and DOM elements
 ├── index.css                   # Custom responsive variables, keyframes & animations
+├── carousel.css                # Card browsing carousel styling, transforms & layouts
 ├── app.js                      # Application controller, upload engine, and PDF compiler
 ├── notes-content.js            # Built-in note content data strings (failsafe local loading)
 ├── .gitignore                  # Development files ignore list
@@ -94,6 +101,19 @@ WebNotes/
 ├── Java_OOP_Reference_Notes.md # Original Java note markdown source
 └── C_Reference_Notes_DSA.md    # Original C note markdown source
 ```
+
+---
+
+## 📅 Recent Updates & Changelog
+
+### 🚀 Version 1.1.0
+- **Real-World Metaphors & Applications**: Elaborated C/DSA, Java OOP, and Python guides with dynamic analogies and production system use cases.
+- **Vibrant Language Styling**: Built CSS classes and header gradients mapping to 24 languages with matching badges and hover glows.
+- **Cross-Platform Monospaced Diagrams**: Replaced warping Unicode box graphics in study guides with Standard Monospaced ASCII drawings.
+- **Interactive Browsing Carousel**: Implemented a 3-card rotating notes carousel with scale/opacity adjustments and smooth transition animations.
+- **Keyboard Shortcuts Helper UI**: Designed an Alt+K keymap cheat sheet overlay panel containing reader, carousel, search, and navigation controls.
+- **Developer Environment Cheat Sheets**: Appended VS Code, PyCharm, IntelliJ Live Templates, Eclipse, GDB, and Vim shortcut tables into Section 1 of the notes.
+- **Intelligent Navigation Routing**: Enhanced `closeNoteViewer` redirection to properly handle landing page scroll placement when returning from an open note viewer.
 
 ---
 

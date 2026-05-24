@@ -154,8 +154,6 @@ function getSlotNotes() {
 }
 
 function buildCardHTML(note, pos) {
-  const openLabel   = pos === 'center' ? '→ Open Note' : pos === 'left' ? '‹ Prev' : 'Next ›';
-  const arrowClass  = pos !== 'center' ? 'style="opacity:0.7;font-size:0.85rem;"' : '';
   return `
     <div class="note-card ${note.cardClass} carousel-card carousel-${pos}" data-note-id="${note.id}" tabindex="0" role="button" aria-label="${pos === 'center' ? 'Open ' : ''}${note.title}">
       <div class="note-card-banner">
@@ -170,7 +168,7 @@ function buildCardHTML(note, pos) {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
             ${note.sections} Sections
           </div>
-          <div class="note-card-arrow" ${arrowClass}>${openLabel}</div>
+          <div class="note-card-open-btn">Open Note <span>→</span></div>
         </div>
       </div>
     </div>`;
@@ -888,7 +886,19 @@ function handleFiles(files) {
 
       const newNote = {
         id: noteId, title, sections,
-        description: content.substring(0, 200).replace(/[#*_`\n\r]/g, ' ').trim() + '...',
+        description: (() => {
+          const bodyText = content
+            .split('\n')
+            .filter(l => !l.match(/^#{1,6}\s/) && l.trim() !== '' && !l.match(/^```/) && !l.match(/^\|/) && !l.match(/^---/))
+            .slice(0, 6)                          // first meaningful lines only
+            .join(' ')
+            .replace(/[*_`\[\]#>!|\\]/g, '')
+            .replace(/\(https?:\/\/[^\)]+\)/g, '')// strip URLs
+            .replace(/\s+/g, ' ')
+            .trim();
+          const trimmed = bodyText.length > 130 ? bodyText.substring(0, 127).replace(/\s+\S*$/, '') + '…' : bodyText;
+          return trimmed || 'No description available.';
+        })(),
         language: langInfo.lang, cardClass: langInfo.cardClass, icon: langInfo.icon,
         content, builtin: false
       };
@@ -934,11 +944,296 @@ function handleFiles(files) {
 }
 
 function detectLanguage(content, filename) {
-  const lower = (content + ' ' + filename).toLowerCase();
-  if (lower.includes('python')  || lower.includes('.py')  || lower.includes('def ')         || lower.includes('import '))         return { lang: 'Python',     cardClass: 'python',   icon: '🐍' };
-  if (lower.includes('java')    || lower.includes('class ')|| lower.includes('public static void'))                                 return { lang: 'Java',       cardClass: 'java',     icon: '☕' };
-  if (lower.includes('#include')|| lower.includes('malloc')|| lower.includes('printf')       || lower.includes('int main'))        return { lang: 'C / DSA',    cardClass: 'c-lang',   icon: '⚙️' };
-  if (lower.includes('javascript')|| lower.includes('const ')|| lower.includes('function '))                                        return { lang: 'JavaScript', cardClass: 'uploaded', icon: '🌐' };
+  const fname = filename.toLowerCase();
+  const lower = content.toLowerCase();
+
+  // ── 1. Filename first — most reliable ────────────────────────
+  if (fname.includes('python') || fname.endsWith('.py'))
+    return { lang: 'Python',     cardClass: 'python',     icon: '🐍' };
+  if ((fname.includes('java') && !fname.includes('javascript')) || fname.endsWith('.java'))
+    return { lang: 'Java',       cardClass: 'java',       icon: '☕' };
+  if (fname.endsWith('.cpp') || fname.endsWith('.cc') || fname.endsWith('.cxx') || fname.includes('cpp') || fname.includes('c++'))
+    return { lang: 'C++',        cardClass: 'cpp-lang',   icon: '⚙️' };
+  if (fname.includes('_c_') || fname.startsWith('c_') || fname.endsWith('.c') || fname.endsWith('.h') || fname.includes('dsa') || fname.includes('c_reference'))
+    return { lang: 'C / DSA',    cardClass: 'c-lang',     icon: '⚙️' };
+  if (fname.includes('typescript') || fname.endsWith('.ts') || fname.endsWith('.tsx'))
+    return { lang: 'TypeScript', cardClass: 'ts-lang',    icon: '🔷' };
+  if (fname.includes('javascript') || fname.endsWith('.js') || fname.endsWith('.jsx'))
+    return { lang: 'JavaScript', cardClass: 'js-lang',    icon: '🌐' };
+  if (fname.includes('rust')   || fname.endsWith('.rs'))
+    return { lang: 'Rust',       cardClass: 'rust-lang',  icon: '🦀' };
+  if (fname.includes('golang') || fname.includes('_go') || fname.endsWith('.go'))
+    return { lang: 'Go',         cardClass: 'go-lang',    icon: '🐹' };
+  if (fname.includes('kotlin') || fname.endsWith('.kt') || fname.endsWith('.kts'))
+    return { lang: 'Kotlin',     cardClass: 'kotlin-lang',icon: '🎯' };
+  if (fname.includes('swift')  || fname.endsWith('.swift'))
+    return { lang: 'Swift',      cardClass: 'swift-lang', icon: '🍎' };
+  if (fname.includes('ruby')   || fname.endsWith('.rb'))
+    return { lang: 'Ruby',       cardClass: 'ruby-lang',  icon: '💎' };
+  if (fname.includes('php')    || fname.endsWith('.php'))
+    return { lang: 'PHP',        cardClass: 'php-lang',   icon: '🐘' };
+  if (fname.includes('sql') || fname.includes('database') || fname.includes('postgres') || fname.includes('mysql') || fname.endsWith('.sql'))
+    return { lang: 'SQL / DB',   cardClass: 'sql-lang',   icon: '🗄️' };
+  if (fname.includes('shell') || fname.includes('bash') || fname.endsWith('.sh') || fname.endsWith('.zsh') || fname.endsWith('.fish'))
+    return { lang: 'Shell',      cardClass: 'shell-lang', icon: '🖥️' };
+  if (fname.includes('web') || fname.includes('html') || fname.includes('css') || fname.endsWith('.html') || fname.endsWith('.css'))
+    return { lang: 'Web Dev',    cardClass: 'web-lang',   icon: '🌍' };
+  if (fname.includes('dart') || fname.endsWith('.dart') || fname.includes('flutter'))
+    return { lang: 'Dart',       cardClass: 'dart-lang',  icon: '🎯' };
+  if (fname.includes('scala')  || fname.endsWith('.scala') || fname.endsWith('.sc'))
+    return { lang: 'Scala',      cardClass: 'scala-lang', icon: '🔺' };
+  if (fname.includes('haskell') || fname.endsWith('.hs') || fname.endsWith('.lhs'))
+    return { lang: 'Haskell',    cardClass: 'haskell-lang', icon: 'λ' };
+  if (fname.includes('_r_') || fname.startsWith('r_') || fname.endsWith('.r') || fname.endsWith('.rmd') || fname.includes('r-lang') || fname.includes('rlang'))
+    return { lang: 'R',          cardClass: 'r-lang',     icon: '📊' };
+  if (fname.includes('lua')    || fname.endsWith('.lua'))
+    return { lang: 'Lua',        cardClass: 'lua-lang',   icon: '🌙' };
+  if (fname.includes('elixir') || fname.endsWith('.ex') || fname.endsWith('.exs'))
+    return { lang: 'Elixir',     cardClass: 'elixir-lang',icon: '💜' };
+  if (fname.includes('docker') || fname.includes('devops') || fname.includes('kubernetes') || fname.includes('k8s') || fname.endsWith('.dockerfile'))
+    return { lang: 'DevOps',     cardClass: 'devops-lang',icon: '🐳' };
+  if (fname.includes('ml') || fname.includes('ai') || fname.includes('deep_learning') || fname.includes('neural'))
+    return { lang: 'ML / AI',    cardClass: 'ml-lang',    icon: '🤖' };
+  if (fname.includes('asm') || fname.endsWith('.asm') || fname.endsWith('.s') || fname.includes('assembly'))
+    return { lang: 'Assembly',   cardClass: 'asm-lang',   icon: '⚡' };
+  if (fname.includes('csharp') || fname.includes('c_sharp') || fname.endsWith('.cs') || fname.includes('dotnet') || fname.includes('.net'))
+    return { lang: 'C#',         cardClass: 'csharp-lang',icon: '💠' };
+
+  // ── 2. Score content — accumulate language-specific signals ──
+  const scores = {
+    python: 0, java: 0, c: 0, cpp: 0, javascript: 0, typescript: 0,
+    rust: 0, go: 0, kotlin: 0, swift: 0, ruby: 0, php: 0,
+    sql: 0, shell: 0, web: 0,
+    dart: 0, scala: 0, haskell: 0, r: 0, lua: 0, elixir: 0,
+    devops: 0, ml: 0, csharp: 0
+  };
+
+  // Python
+  if (lower.includes('def ') && lower.includes(':'))          scores.python += 3;
+  if (lower.includes('print('))                               scores.python += 2;
+  if (lower.includes('elif '))                                scores.python += 4;
+  if (lower.includes('__init__'))                             scores.python += 4;
+  if (lower.includes('self.'))                                scores.python += 3;
+  if (lower.includes('pip install'))                          scores.python += 4;
+  if (lower.includes('#!/usr/bin/env python'))                scores.python += 5;
+  if (/from\s+\w+\s+import\s+/m.test(lower))                 scores.python += 3;
+  if (/import\s+(numpy|pandas|flask|django|os|sys|re|requests|matplotlib)\b/.test(lower)) scores.python += 5;
+
+  // Java
+  if (lower.includes('public class '))                        scores.java += 4;
+  if (lower.includes('public static void main'))              scores.java += 5;
+  if (lower.includes('system.out.println'))                   scores.java += 4;
+  if (lower.includes('import java.'))                         scores.java += 5;
+  if (lower.includes('@override'))                            scores.java += 4;
+  if (lower.includes('new arraylist') || lower.includes('new hashmap')) scores.java += 3;
+  if (lower.includes('throws ') || lower.includes('implements ')) scores.java += 2;
+
+  // C
+  if (lower.includes('#include <stdio') || lower.includes('#include <stdlib')) scores.c += 6;
+  if (lower.includes('#include'))                             scores.c += 3;
+  if (lower.includes('int main('))                            scores.c += 5;
+  if (lower.includes('printf(') || lower.includes('scanf(')) scores.c += 4;
+  if (lower.includes('malloc(') || lower.includes('free('))  scores.c += 4;
+  if (lower.includes('struct ') && lower.includes('typedef ')) scores.c += 3;
+
+  // C++
+  if (lower.includes('#include <iostream'))                   scores.cpp += 6;
+  if (lower.includes('std::') || lower.includes('cout <<'))  scores.cpp += 5;
+  if (lower.includes('namespace '))                           scores.cpp += 3;
+  if (lower.includes('vector<') || lower.includes('map<'))   scores.cpp += 4;
+  if (lower.includes('class ') && lower.includes('public:')) scores.cpp += 4;
+  if (lower.includes('template<') || lower.includes('template <')) scores.cpp += 5;
+
+  // JavaScript
+  if (lower.includes('console.log'))                         scores.javascript += 4;
+  if (lower.includes('document.') || lower.includes('window.')) scores.javascript += 3;
+  if (lower.includes('addeventlistener'))                    scores.javascript += 3;
+  if (/=>\s*[\({]/.test(lower))                              scores.javascript += 3;
+  if (lower.includes('require(') || lower.includes("from '") || lower.includes('from "')) scores.javascript += 2;
+  if (lower.includes('node.js') || lower.includes('nodejs') || lower.includes('npm ')) scores.javascript += 3;
+  if (lower.includes('promise') || lower.includes('async/await') || lower.includes('async ')) scores.javascript += 2;
+
+  // TypeScript
+  if (lower.includes(': string') || lower.includes(': number') || lower.includes(': boolean')) scores.typescript += 4;
+  if (lower.includes('interface ') || lower.includes('type ') && lower.includes('= {')) scores.typescript += 4;
+  if (lower.includes(': void') || lower.includes(': any'))   scores.typescript += 3;
+  if (lower.includes('enum '))                               scores.typescript += 4;
+  if (lower.includes('tsc ') || lower.includes('tsconfig'))  scores.typescript += 5;
+  if (lower.includes('generic') && lower.includes('<t>'))    scores.typescript += 3;
+
+  // Rust
+  if (lower.includes('fn main()') || lower.includes('fn main(') ) scores.rust += 5;
+  if (lower.includes('let mut '))                            scores.rust += 5;
+  if (lower.includes('println!(') || lower.includes('vec![')) scores.rust += 5;
+  if (lower.includes('ownership') || lower.includes('borrowing') || lower.includes('lifetime')) scores.rust += 4;
+  if (lower.includes('cargo ') || lower.includes('cargo.toml')) scores.rust += 5;
+  if (lower.includes('impl ') && lower.includes('trait '))   scores.rust += 4;
+  if (lower.includes('match ') && lower.includes('=>'))      scores.rust += 3;
+
+  // Go
+  if (lower.includes('func main()'))                         scores.go += 5;
+  if (lower.includes('fmt.println') || lower.includes('fmt.printf')) scores.go += 5;
+  if (lower.includes('goroutine') || lower.includes('go func')) scores.go += 5;
+  if (lower.includes(':= '))                                 scores.go += 3;
+  if (lower.includes('package main') || lower.includes('import (')) scores.go += 4;
+  if (lower.includes('channel') || lower.includes('chan '))  scores.go += 4;
+
+  // Kotlin
+  if (lower.includes('fun main(') || lower.includes('fun main()')) scores.kotlin += 5;
+  if (lower.includes('val ') || lower.includes('var ') && lower.includes('fun ')) scores.kotlin += 3;
+  if (lower.includes('data class'))                          scores.kotlin += 5;
+  if (lower.includes('coroutine') || lower.includes('suspend fun')) scores.kotlin += 5;
+  if (lower.includes('kotlin') || lower.includes('.kts'))    scores.kotlin += 3;
+  if (lower.includes('null safety') || lower.includes('?.') && lower.includes('?:')) scores.kotlin += 3;
+
+  // Swift
+  if (lower.includes('import uikit') || lower.includes('import swiftui')) scores.swift += 6;
+  if (lower.includes('var ') && lower.includes('let ') && lower.includes('func ')) scores.swift += 3;
+  if (lower.includes('optionals') || lower.includes('guard let') || lower.includes('if let ')) scores.swift += 4;
+  if (lower.includes('xcodeproj') || lower.includes('xcode'))scores.swift += 4;
+  if (lower.includes('@state') || lower.includes('@binding') || lower.includes('@published')) scores.swift += 5;
+  if (lower.includes('protocol ') && lower.includes('extension ')) scores.swift += 4;
+
+  // Ruby
+  if (lower.includes('def ') && lower.includes('end'))       scores.ruby += 4;
+  if (lower.includes('puts ') || lower.includes('p "') || lower.includes("p '")) scores.ruby += 4;
+  if (lower.includes('rails') || lower.includes('activerecord') || lower.includes('gemfile')) scores.ruby += 5;
+  if (lower.includes('gem ') || lower.includes('bundle exec')) scores.ruby += 4;
+  if (lower.includes('.each') || lower.includes('.map') || lower.includes('.select')) scores.ruby += 3;
+  if (lower.includes('attr_accessor') || lower.includes('attr_reader')) scores.ruby += 5;
+
+  // PHP
+  if (lower.includes('<?php') || lower.includes('echo '))    scores.php += 5;
+  if (lower.includes('$_get') || lower.includes('$_post') || lower.includes('$_session')) scores.php += 5;
+  if (lower.includes('->') && lower.includes('$'))           scores.php += 4;
+  if (lower.includes('laravel') || lower.includes('symfony') || lower.includes('wordpress')) scores.php += 5;
+  if (lower.includes('composer') || lower.includes('artisan')) scores.php += 4;
+
+  // SQL / Database
+  if (/\bselect\b.*\bfrom\b/i.test(lower))                  scores.sql += 5;
+  if (/\binsert into\b/i.test(lower) || /\bupdate\b.*\bset\b/i.test(lower)) scores.sql += 4;
+  if (/\bcreate table\b/i.test(lower) || /\balter table\b/i.test(lower)) scores.sql += 5;
+  if (lower.includes('primary key') || lower.includes('foreign key')) scores.sql += 4;
+  if (lower.includes('join ') || lower.includes('inner join') || lower.includes('left join')) scores.sql += 3;
+  if (lower.includes('postgresql') || lower.includes('mysql') || lower.includes('sqlite')) scores.sql += 4;
+
+  // Shell / Bash
+  if (lower.includes('#!/bin/bash') || lower.includes('#!/bin/sh')) scores.shell += 6;
+  if (lower.includes('chmod ') || lower.includes('chown '))  scores.shell += 4;
+  if (lower.includes('grep ') || lower.includes('awk ') || lower.includes('sed ')) scores.shell += 4;
+  if (lower.includes('$home') || lower.includes('$path') || lower.includes('$user')) scores.shell += 3;
+  if (lower.includes('if [ ') || lower.includes('fi\n') || lower.includes('done\n')) scores.shell += 4;
+  if (lower.includes('apt-get') || lower.includes('brew install') || lower.includes('yum ')) scores.shell += 4;
+  if (lower.includes('.bashrc') || lower.includes('.zshrc') || lower.includes('alias ')) scores.shell += 3;
+
+  // Web Dev (HTML/CSS)
+  if (lower.includes('<!doctype html') || lower.includes('<html'))  scores.web += 5;
+  if (lower.includes('<div') || lower.includes('<body') || lower.includes('<header')) scores.web += 3;
+  if (lower.includes('css') && (lower.includes('flex') || lower.includes('grid'))) scores.web += 4;
+  if (lower.includes('media query') || lower.includes('@media'))    scores.web += 4;
+  if (lower.includes('react') || lower.includes('vue') || lower.includes('angular')) scores.web += 4;
+  if (lower.includes('dom ') || lower.includes('css selector') || lower.includes('flexbox')) scores.web += 3;
+  if (lower.includes('responsive') || lower.includes('bootstrap') || lower.includes('tailwind')) scores.web += 3;
+
+  // Dart / Flutter
+  if (lower.includes('flutter') || lower.includes('dart:'))        scores.dart += 6;
+  if (lower.includes('widget') && lower.includes('build('))        scores.dart += 5;
+  if (lower.includes('statefulwidget') || lower.includes('statelesswidget')) scores.dart += 6;
+  if (lower.includes('pubspec') || lower.includes('pub.dev'))      scores.dart += 5;
+  if (/void main\(\)/.test(lower) && lower.includes('runapp'))     scores.dart += 5;
+
+  // Scala
+  if (lower.includes('object ') && lower.includes('extends app'))  scores.scala += 6;
+  if (lower.includes('case class') || lower.includes('sealed trait')) scores.scala += 5;
+  if (lower.includes('akka') || lower.includes('spark') || lower.includes('play framework')) scores.scala += 6;
+  if (lower.includes('implicit ') || lower.includes('def ') && lower.includes('=>')) scores.scala += 3;
+  if (lower.includes('sbt ') || lower.includes('scala build tool')) scores.scala += 5;
+
+  // Haskell
+  if (lower.includes('module main') || lower.includes('import data.')) scores.haskell += 5;
+  if (lower.includes('haskell') || lower.includes('ghc') || lower.includes('cabal')) scores.haskell += 6;
+  if (lower.includes('monad') || lower.includes('functor') || lower.includes('applicative')) scores.haskell += 5;
+  if (/\blet\b.*\bin\b/.test(lower) && lower.includes('where'))    scores.haskell += 4;
+  if (lower.includes('pattern matching') || lower.includes('lazy evaluation')) scores.haskell += 4;
+  if (lower.includes('type class') || lower.includes('type classes')) scores.haskell += 5;
+
+  // R
+  if (lower.includes('<-') && (lower.includes('ggplot') || lower.includes('tidyverse') || lower.includes('dplyr'))) scores.r += 7;
+  if (lower.includes('library(') || lower.includes('require('))    scores.r += 4;
+  if (lower.includes('data.frame') || lower.includes('tibble'))     scores.r += 5;
+  if (lower.includes('ggplot2') || lower.includes('shiny') || lower.includes('rmarkdown')) scores.r += 6;
+  if (lower.includes('vector()') || lower.includes('c(') && lower.includes('data.frame')) scores.r += 3;
+  if (lower.includes('r programming') || lower.includes('r language') || lower.includes('cran')) scores.r += 5;
+
+  // Lua
+  if (lower.includes('function ') && lower.includes('end') && lower.includes('local ')) scores.lua += 5;
+  if (lower.includes('print(') && lower.includes('--') && !lower.includes('public class')) scores.lua += 3;
+  if (lower.includes('love2d') || lower.includes('roblox') || lower.includes('openresty')) scores.lua += 6;
+  if (lower.includes('table.insert') || lower.includes('table.remove') || lower.includes('ipairs')) scores.lua += 6;
+  if (lower.includes('coroutine.') || lower.includes('require "'))  scores.lua += 4;
+
+  // Elixir
+  if (lower.includes('defmodule ') || lower.includes('defp ') || lower.includes('def ') && lower.includes('do\n')) scores.elixir += 5;
+  if (lower.includes('phoenix') || lower.includes('mix ') || lower.includes('ecto')) scores.elixir += 6;
+  if (lower.includes('|>') && lower.includes('elixir'))             scores.elixir += 6;
+  if (lower.includes('iex>') || lower.includes('genserver'))        scores.elixir += 6;
+  if (lower.includes('pattern matching') && lower.includes('pipe operator')) scores.elixir += 5;
+
+  // DevOps / Docker / K8s
+  if (lower.includes('dockerfile') || lower.includes('docker-compose') || lower.includes('from ubuntu') || lower.includes('from alpine')) scores.devops += 6;
+  if (lower.includes('kubernetes') || lower.includes('kubectl') || lower.includes('helm ')) scores.devops += 6;
+  if (lower.includes('ci/cd') || lower.includes('github actions') || lower.includes('jenkins')) scores.devops += 5;
+  if (lower.includes('terraform') || lower.includes('ansible') || lower.includes('infrastructure as code')) scores.devops += 5;
+  if (lower.includes('container') && (lower.includes('image') || lower.includes('orchestration'))) scores.devops += 4;
+
+  // ML / AI
+  if (lower.includes('neural network') || lower.includes('deep learning') || lower.includes('machine learning')) scores.ml += 6;
+  if (lower.includes('tensorflow') || lower.includes('pytorch') || lower.includes('keras')) scores.ml += 7;
+  if (lower.includes('gradient descent') || lower.includes('backpropagation') || lower.includes('loss function')) scores.ml += 6;
+  if (lower.includes('transformer') || lower.includes('attention mechanism') || lower.includes('llm')) scores.ml += 6;
+  if (lower.includes('scikit-learn') || lower.includes('sklearn') || lower.includes('pandas') && lower.includes('model')) scores.ml += 5;
+  if (lower.includes('epoch') || lower.includes('batch size') || lower.includes('overfitting') || lower.includes('underfitting')) scores.ml += 4;
+
+  // C# / .NET
+  if (lower.includes('using system') || lower.includes('namespace ') && lower.includes('class ')) scores.csharp += 5;
+  if (lower.includes('console.writeline') || lower.includes('console.write(')) scores.csharp += 5;
+  if (lower.includes('.net') || lower.includes('asp.net') || lower.includes('xamarin') || lower.includes('unity')) scores.csharp += 5;
+  if (lower.includes('async task') || lower.includes('await ') && lower.includes('using (')) scores.csharp += 4;
+  if (lower.includes('linq') || lower.includes('ienumerable') || lower.includes('list<')) scores.csharp += 4;
+  if (lower.includes('nuget') || lower.includes('dotnet '))         scores.csharp += 4;
+
+  // ── 3. Pick winner if score ≥ 4, else generic fallback ──────
+  const [winner, topScore] = Object.entries(scores).sort((a, b) => b[1] - a[1])[0];
+  if (topScore >= 4) {
+    const map = {
+      python:     { lang: 'Python',     cardClass: 'python',      icon: '🐍' },
+      java:       { lang: 'Java',       cardClass: 'java',        icon: '☕' },
+      c:          { lang: 'C / DSA',    cardClass: 'c-lang',      icon: '⚙️' },
+      cpp:        { lang: 'C++',        cardClass: 'cpp-lang',    icon: '⚙️' },
+      javascript: { lang: 'JavaScript', cardClass: 'js-lang',     icon: '🌐' },
+      typescript: { lang: 'TypeScript', cardClass: 'ts-lang',     icon: '🔷' },
+      rust:       { lang: 'Rust',       cardClass: 'rust-lang',   icon: '🦀' },
+      go:         { lang: 'Go',         cardClass: 'go-lang',     icon: '🐹' },
+      kotlin:     { lang: 'Kotlin',     cardClass: 'kotlin-lang', icon: '🎯' },
+      swift:      { lang: 'Swift',      cardClass: 'swift-lang',  icon: '🍎' },
+      ruby:       { lang: 'Ruby',       cardClass: 'ruby-lang',   icon: '💎' },
+      php:        { lang: 'PHP',        cardClass: 'php-lang',    icon: '🐘' },
+      sql:        { lang: 'SQL / DB',   cardClass: 'sql-lang',    icon: '🗄️' },
+      shell:      { lang: 'Shell',      cardClass: 'shell-lang',  icon: '🖥️' },
+      web:        { lang: 'Web Dev',    cardClass: 'web-lang',    icon: '🌍' },
+      dart:       { lang: 'Dart',       cardClass: 'dart-lang',   icon: '🎯' },
+      scala:      { lang: 'Scala',      cardClass: 'scala-lang',  icon: '🔺' },
+      haskell:    { lang: 'Haskell',    cardClass: 'haskell-lang',icon: 'λ' },
+      r:          { lang: 'R',          cardClass: 'r-lang',      icon: '📊' },
+      lua:        { lang: 'Lua',        cardClass: 'lua-lang',    icon: '🌙' },
+      elixir:     { lang: 'Elixir',     cardClass: 'elixir-lang', icon: '💜' },
+      devops:     { lang: 'DevOps',     cardClass: 'devops-lang', icon: '🐳' },
+      ml:         { lang: 'ML / AI',    cardClass: 'ml-lang',     icon: '🤖' },
+      csharp:     { lang: 'C#',         cardClass: 'csharp-lang', icon: '💠' }
+    };
+    return map[winner];
+  }
+
   return { lang: 'Notes', cardClass: 'uploaded', icon: '📄' };
 }
 
