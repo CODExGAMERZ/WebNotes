@@ -54,6 +54,20 @@ Unlike fully compiled languages (like C++ or Rust) where source code is compiled
 
 > **💼 Industry Application:** Python powers some of the world's largest platforms. **Instagram** runs on Python/Django to serve billions of requests. **Spotify** uses Python for backend services and data analysis. **Netflix** uses it for recommendation engine pipelines. Its interpreted nature allows rapid prototyping — engineers ship features faster because they skip the compile-wait-run cycle.
 
+### ⌨️ Developer Productivity Shortcuts (VS Code & PyCharm)
+To write Python code efficiently in popular IDEs like VS Code or PyCharm, master these essential keyboard shortcuts:
+
+| Action | VS Code Shortcut | PyCharm Shortcut |
+| :--- | :--- | :--- |
+| **Run Code** | \`Ctrl + F5\` (or click play) | \`Shift + F10\` |
+| **Debug Code** | \`F5\` | \`Shift + F9\` |
+| **Toggle Comment** | \`Ctrl + /\` (Windows/Linux) or \`Cmd + /\` (macOS) | \`Ctrl + /\` or \`Cmd + /\` |
+| **Format Document** | \`Alt + Shift + F\` (runs Black/Ruff formatter) | \`Ctrl + Alt + L\` |
+| **Go to Definition** | \`F12\` or \`Ctrl + Click\` | \`Ctrl + B\` or \`Ctrl + Click\` |
+| **Rename Symbol** | \`F2\` (renames all variables/functions safely) | \`Shift + F6\` |
+| **Run Selection in REPL** | \`Shift + Enter\` (opens interactive window) | \`Alt + Shift + E\` |
+| **Command Palette** | \`Ctrl + Shift + P\` | \`Double Shift\` (Search Everywhere) |
+
 ### Practice Questions
 * **Question 1:** Explain what happens behind the scenes when you run a Python script, detailing the role of Bytecode and the Python Virtual Machine (PVM).
 * **Question 2:** What is the primary difference between CPython and PyPy in terms of code execution, and how does the GIL affect multi-threaded programs in CPython?
@@ -1434,6 +1448,20 @@ public class Main {
 > - **Class Loaders:** This system is like a **library's lookup hierarchy**: checking your desk bookshelf first (System ClassLoader), then the reference section (Platform ClassLoader), and finally calling the main library archives (Bootstrap ClassLoader).
 >
 > **💼 Industry Application:** Large scale systems like **Elasticsearch**, **Apache Spark**, and enterprise backend APIs run on JVM-based systems. Financial institutions use HotSpot's JIT optimization because low-latency server transactions automatically speed up over runtime as hotspots are compiled directly to machine binary.
+
+### ⌨️ Developer Productivity Shortcuts (IntelliJ IDEA & Eclipse)
+Java development in IDEs like IntelliJ IDEA or Eclipse relies heavily on keyboard shortcuts and code generation templates (Live Templates) to bypass standard Java boilerplate:
+
+| Action / Generation | IntelliJ IDEA Shortcut | Eclipse Shortcut |
+| :--- | :--- | :--- |
+| **Generate main method** | Type \`psvm\` or \`main\` + \`Tab\` / \`Enter\` | Type \`main\` + \`Ctrl + Space\` |
+| **Generate print line** | Type \`sout\` + \`Tab\` / \`Enter\` | Type \`sysout\` + \`Ctrl + Space\` |
+| **Generate boilerplate** | \`Alt + Insert\` (constructors, getters/setters, equals) | \`Alt + Shift + S\` |
+| **Quick Fix / Import** | \`Alt + Enter\` (auto-imports classes, fixes errors) | \`Ctrl + 1\` |
+| **Format Code** | \`Ctrl + Alt + L\` | \`Ctrl + Shift + F\` |
+| **Rename Refactoring** | \`Shift + F6\` (safely renames classes/variables) | \`Alt + Shift + R\` |
+| **Search Classes** | \`Ctrl + N\` (or double shift) | \`Ctrl + Shift + T\` |
+| **Extract Method** | \`Ctrl + Alt + M\` (converts highlighted code to method) | \`Alt + Shift + M\` |
 
 ### Practice Questions
 
@@ -3697,6 +3725,32 @@ int main() {
 > - **Makefile:** A **construction foreman's checklist**: they only rebuild the sections of the building that were damaged or modified, rather than rebuilding the entire structure from scratch.
 >
 > **💼 Industry Application:** Large scale project build tools like the **Linux Kernel** or **Chromium** use Makefiles and compiler flags (\`-O3\`) to organize compilation of millions of lines of code efficiently, skipping unmodified files to reduce developers' build wait times.
+
+### ⌨️ Developer Productivity Shortcuts (GDB & Vim & Editors)
+Systems programmers write C code and debug algorithms using command-line tools like GDB (GNU Debugger) and Vim. Mastering these console-based commands is essential for low-level development:
+
+#### 1. GDB Debugging Command Shortcuts
+When running a compiled binary with debug symbols (\`gcc -g program.c -o program\`), load it in GDB (\`gdb ./program\`) and use these shorthand command keys:
+
+* **\`r\` or \`run\`**: Starts executing the program from the beginning.
+* **\`b <line_number>\` or \`b <function_name>\`**: Sets a breakpoint at the specified line or function.
+* **\`n\` or \`next\`**: Executes the next line of code, stepping *over* function calls (does not enter them).
+* **\`s\` or \`step\`**: Executes the next line of code, stepping *into* function calls.
+* **\`c\` or \`continue\`**: Resumes program execution until the next breakpoint is hit or the program exits.
+* **\`p <variable_name>\`**: Prints the current value of a variable in memory.
+* **\`bt\` or \`backtrace\`**: Prints the call stack, showing the active functions that led to the current line.
+* **\`q\` or \`quit\`**: Exits the GDB debugger console.
+
+#### 2. Vim Editor Console Shortcuts
+Vim is the standard terminal editor for C systems programming. Use these modal editing shortcuts:
+
+* **\`i\`**: Enter **Insert Mode** (to type code) at the cursor.
+* **\`Esc\`**: Return to **Normal Mode** (to navigate or run commands).
+* **\`dd\` / \`yy\` / \`p\`**: Cut line / Copy (yank) line / Paste copied text (in Normal Mode).
+* **\`/pattern\`**: Search for text in the file. Press \`n\` to go to the next match.
+* **\`u\` / \`Ctrl + r\`**: Undo / Redo the last change.
+* **\`gg\` / \`G\`**: Jump to the top / bottom of the document instantly.
+* **\`:w\` / \`:q\` / \`:wq\`**: Save / Quit / Save and Quit (write-quit).
 
 ### Practice Questions
 * **Question 1:** Describe the inputs and outputs of each of the four compilation stages when compiling a C file named \`program.c\`.

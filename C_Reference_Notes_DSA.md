@@ -109,6 +109,32 @@ int main() {
 >
 > **💼 Industry Application:** Large scale project build tools like the **Linux Kernel** or **Chromium** use Makefiles and compiler flags (`-O3`) to organize compilation of millions of lines of code efficiently, skipping unmodified files to reduce developers' build wait times.
 
+### ⌨️ Developer Productivity Shortcuts (GDB & Vim & Editors)
+Systems programmers write C code and debug algorithms using command-line tools like GDB (GNU Debugger) and Vim. Mastering these console-based commands is essential for low-level development:
+
+#### 1. GDB Debugging Command Shortcuts
+When running a compiled binary with debug symbols (`gcc -g program.c -o program`), load it in GDB (`gdb ./program`) and use these shorthand command keys:
+
+* **`r` or `run`**: Starts executing the program from the beginning.
+* **`b <line_number>` or `b <function_name>`**: Sets a breakpoint at the specified line or function.
+* **`n` or `next`**: Executes the next line of code, stepping *over* function calls (does not enter them).
+* **`s` or `step`**: Executes the next line of code, stepping *into* function calls.
+* **`c` or `continue`**: Resumes program execution until the next breakpoint is hit or the program exits.
+* **`p <variable_name>`**: Prints the current value of a variable in memory.
+* **`bt` or `backtrace`**: Prints the call stack, showing the active functions that led to the current line.
+* **`q` or `quit`**: Exits the GDB debugger console.
+
+#### 2. Vim Editor Console Shortcuts
+Vim is the standard terminal editor for C systems programming. Use these modal editing shortcuts:
+
+* **`i`**: Enter **Insert Mode** (to type code) at the cursor.
+* **`Esc`**: Return to **Normal Mode** (to navigate or run commands).
+* **`dd` / `yy` / `p`**: Cut line / Copy (yank) line / Paste copied text (in Normal Mode).
+* **`/pattern`**: Search for text in the file. Press `n` to go to the next match.
+* **`u` / `Ctrl + r`**: Undo / Redo the last change.
+* **`gg` / `G`**: Jump to the top / bottom of the document instantly.
+* **`:w` / `:q` / `:wq`**: Save / Quit / Save and Quit (write-quit).
+
 ### Practice Questions
 * **Question 1:** Describe the inputs and outputs of each of the four compilation stages when compiling a C file named `program.c`.
 * **Question 2:** Explain what a Makefile is and write a simple Makefile to compile `main.c` and `helper.c` into an executable named `app.exe` using `gcc` with warning flags.

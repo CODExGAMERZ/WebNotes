@@ -134,6 +134,20 @@ public class Main {
 >
 > **💼 Industry Application:** Large scale systems like **Elasticsearch**, **Apache Spark**, and enterprise backend APIs run on JVM-based systems. Financial institutions use HotSpot's JIT optimization because low-latency server transactions automatically speed up over runtime as hotspots are compiled directly to machine binary.
 
+### ⌨️ Developer Productivity Shortcuts (IntelliJ IDEA & Eclipse)
+Java development in IDEs like IntelliJ IDEA or Eclipse relies heavily on keyboard shortcuts and code generation templates (Live Templates) to bypass standard Java boilerplate:
+
+| Action / Generation | IntelliJ IDEA Shortcut | Eclipse Shortcut |
+| :--- | :--- | :--- |
+| **Generate main method** | Type `psvm` or `main` + `Tab` / `Enter` | Type `main` + `Ctrl + Space` |
+| **Generate print line** | Type `sout` + `Tab` / `Enter` | Type `sysout` + `Ctrl + Space` |
+| **Generate boilerplate** | `Alt + Insert` (constructors, getters/setters, equals) | `Alt + Shift + S` |
+| **Quick Fix / Import** | `Alt + Enter` (auto-imports classes, fixes errors) | `Ctrl + 1` |
+| **Format Code** | `Ctrl + Alt + L` | `Ctrl + Shift + F` |
+| **Rename Refactoring** | `Shift + F6` (safely renames classes/variables) | `Alt + Shift + R` |
+| **Search Classes** | `Ctrl + N` (or double shift) | `Ctrl + Shift + T` |
+| **Extract Method** | `Ctrl + Alt + M` (converts highlighted code to method) | `Alt + Shift + M` |
+
 ### Practice Questions
 
 * **Question 1:** Explain how Java achieves platform independence, highlighting the roles of `.class` files, Bytecode, and the JVM.

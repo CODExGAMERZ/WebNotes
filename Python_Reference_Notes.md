@@ -49,6 +49,20 @@ Unlike fully compiled languages (like C++ or Rust) where source code is compiled
 
 > **💼 Industry Application:** Python powers some of the world's largest platforms. **Instagram** runs on Python/Django to serve billions of requests. **Spotify** uses Python for backend services and data analysis. **Netflix** uses it for recommendation engine pipelines. Its interpreted nature allows rapid prototyping — engineers ship features faster because they skip the compile-wait-run cycle.
 
+### ⌨️ Developer Productivity Shortcuts (VS Code & PyCharm)
+To write Python code efficiently in popular IDEs like VS Code or PyCharm, master these essential keyboard shortcuts:
+
+| Action | VS Code Shortcut | PyCharm Shortcut |
+| :--- | :--- | :--- |
+| **Run Code** | `Ctrl + F5` (or click play) | `Shift + F10` |
+| **Debug Code** | `F5` | `Shift + F9` |
+| **Toggle Comment** | `Ctrl + /` (Windows/Linux) or `Cmd + /` (macOS) | `Ctrl + /` or `Cmd + /` |
+| **Format Document** | `Alt + Shift + F` (runs Black/Ruff formatter) | `Ctrl + Alt + L` |
+| **Go to Definition** | `F12` or `Ctrl + Click` | `Ctrl + B` or `Ctrl + Click` |
+| **Rename Symbol** | `F2` (renames all variables/functions safely) | `Shift + F6` |
+| **Run Selection in REPL** | `Shift + Enter` (opens interactive window) | `Alt + Shift + E` |
+| **Command Palette** | `Ctrl + Shift + P` | `Double Shift` (Search Everywhere) |
+
 ### Practice Questions
 * **Question 1:** Explain what happens behind the scenes when you run a Python script, detailing the role of Bytecode and the Python Virtual Machine (PVM).
 * **Question 2:** What is the primary difference between CPython and PyPy in terms of code execution, and how does the GIL affect multi-threaded programs in CPython?

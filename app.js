@@ -322,6 +322,21 @@ document.addEventListener('keydown', (e) => {
       e.preventDefault();
       closeNoteViewer();
     }
+    // Alt + H closes reader and returns to Home Page top
+    if (e.altKey && e.key.toLowerCase() === 'h') {
+      e.preventDefault();
+      closeNoteViewer('home');
+    }
+    // Alt + N closes reader and returns to Notes collection
+    if (e.altKey && e.key.toLowerCase() === 'n') {
+      e.preventDefault();
+      closeNoteViewer('notes');
+    }
+    // Alt + U closes reader and returns to Upload section
+    if (e.altKey && e.key.toLowerCase() === 'u') {
+      e.preventDefault();
+      closeNoteViewer('upload');
+    }
     // Alt + O toggles Outline (TOC)
     if (e.altKey && e.key.toLowerCase() === 'o') {
       e.preventDefault();
@@ -587,7 +602,7 @@ async function openNote(note) {
   }, 350);
 }
 
-function closeNoteViewer() {
+function closeNoteViewer(scrollToSectionId = null) {
   noteViewer.classList.add('page-fade-out');
 
   if (tocSidebar && tocSidebar.classList.contains('open')) {
@@ -603,9 +618,15 @@ function closeNoteViewer() {
     landingPage.classList.add('page-fade-out');
     landingPage.style.display = 'block';
 
-    const targetId = activeNote?.builtin ? 'notes' : 'upload';
-    const section  = document.getElementById(targetId);
-    if (section) section.scrollIntoView({ behavior: 'instant' });
+    const targetSection = typeof scrollToSectionId === 'string' ? scrollToSectionId : null;
+
+    if (targetSection === 'home') {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    } else {
+      const targetId = targetSection || (activeNote?.builtin ? 'notes' : 'upload');
+      const section  = document.getElementById(targetId);
+      if (section) section.scrollIntoView({ behavior: 'instant' });
+    }
 
     setTimeout(() => landingPage.classList.remove('page-fade-out'), 50);
 
