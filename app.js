@@ -289,11 +289,74 @@ document.addEventListener('touchend', (e) => {
 if (carouselPrevBtn) carouselPrevBtn.addEventListener('click', () => rotateCarousel(-1));
 if (carouselNextBtn) carouselNextBtn.addEventListener('click', () => rotateCarousel(1));
 
-// Keyboard left / right arrow keys
+// Keyboard shortcuts
 document.addEventListener('keydown', (e) => {
-  if (noteViewer.classList.contains('active')) return; // don't interfere with note viewer
-  if (e.key === 'ArrowLeft')  rotateCarousel(-1);
-  if (e.key === 'ArrowRight') rotateCarousel(1);
+  const isViewerActive = noteViewer.classList.contains('active');
+  const isInputFocused = document.activeElement === searchInput || 
+                         document.activeElement.tagName === 'INPUT' || 
+                         document.activeElement.tagName === 'TEXTAREA';
+
+  // 1. Universal Shortcuts:
+  // "/" focuses search bar (if searchInput is on the page and not already focused on an input)
+  if (e.key === '/' && !isInputFocused) {
+    if (!isViewerActive) {
+      e.preventDefault();
+      const searchSec = document.getElementById('notes');
+      if (searchSec) {
+        searchSec.scrollIntoView({ behavior: 'smooth' });
+      }
+      setTimeout(() => searchInput.focus(), 300);
+    }
+  }
+
+  // Alt + K toggles the shortcuts helper modal
+  if (e.altKey && e.key.toLowerCase() === 'k') {
+    e.preventDefault();
+    toggleShortcutsModal();
+  }
+
+  // 2. Note Viewer specific shortcuts:
+  if (isViewerActive) {
+    // Escape goes back
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      closeNoteViewer();
+    }
+    // Alt + O toggles Outline (TOC)
+    if (e.altKey && e.key.toLowerCase() === 'o') {
+      e.preventDefault();
+      toggleTOC();
+    }
+    // Alt + P triggers PDF download
+    if (e.altKey && e.key.toLowerCase() === 'p') {
+      e.preventDefault();
+      if (downloadPdfBtn) downloadPdfBtn.click();
+    }
+  } else {
+    // 3. Landing page specific shortcuts:
+    if (!isInputFocused) {
+      if (e.key === 'ArrowLeft')  rotateCarousel(-1);
+      if (e.key === 'ArrowRight') rotateCarousel(1);
+      
+      // Alt + H scrolls to Home (Hero)
+      if (e.altKey && e.key.toLowerCase() === 'h') {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      // Alt + N scrolls to Notes
+      if (e.altKey && e.key.toLowerCase() === 'n') {
+        e.preventDefault();
+        const section = document.getElementById('notes');
+        if (section) section.scrollIntoView({ behavior: 'smooth' });
+      }
+      // Alt + U scrolls to Upload
+      if (e.altKey && e.key.toLowerCase() === 'u') {
+        e.preventDefault();
+        const section = document.getElementById('upload');
+        if (section) section.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }
 });
 
 // ════════════════════════════════════════════
@@ -375,13 +438,51 @@ hamburger.addEventListener('click', () => {
   navLinks.classList.toggle('open');
 });
 
+// ── TOC Sidebar Toggle Drawer & Layout ──
+const isMobile = () => window.innerWidth <= 1024;
+const openTOC  = () => { tocSidebar.classList.add('open'); sidebarOverlay.classList.add('active'); document.body.classList.add('toc-open'); };
+const closeTOC = () => { tocSidebar.classList.remove('open'); sidebarOverlay.classList.remove('active'); document.body.classList.remove('toc-open'); };
+
+const toggleTOC = () => {
+  if (isMobile()) {
+    if (tocSidebar.classList.contains('open')) {
+      closeTOC();
+    } else {
+      openTOC();
+    }
+  } else {
+    const noteLayout = document.querySelector('.note-layout');
+    if (noteLayout) {
+      noteLayout.classList.toggle('toc-collapsed');
+    }
+  }
+};
+
 if (tocToggleBtn && tocSidebar && tocCloseBtn && sidebarOverlay) {
-  const isMobile = () => window.innerWidth <= 1024;
-  const openTOC  = () => { tocSidebar.classList.add('open'); sidebarOverlay.classList.add('active'); document.body.classList.add('toc-open'); };
-  const closeTOC = () => { tocSidebar.classList.remove('open'); sidebarOverlay.classList.remove('active'); document.body.classList.remove('toc-open'); };
-  tocToggleBtn.addEventListener('click', () => { if (isMobile()) openTOC(); });
+  tocToggleBtn.addEventListener('click', toggleTOC);
   tocCloseBtn.addEventListener('click', closeTOC);
   sidebarOverlay.addEventListener('click', closeTOC);
+}
+
+// ── Keyboard Shortcuts Help Modal ──
+const shortcutsModal = document.getElementById('shortcuts-modal');
+const shortcutsBtn   = document.getElementById('keyboard-shortcuts-btn');
+const shortcutsClose = document.getElementById('shortcuts-close-btn');
+
+const toggleShortcutsModal = () => {
+  if (shortcutsModal) {
+    shortcutsModal.classList.toggle('open');
+  }
+};
+
+if (shortcutsBtn && shortcutsClose && shortcutsModal) {
+  shortcutsBtn.addEventListener('click', toggleShortcutsModal);
+  shortcutsClose.addEventListener('click', () => shortcutsModal.classList.remove('open'));
+  shortcutsModal.addEventListener('click', (e) => {
+    if (e.target === shortcutsModal) {
+      shortcutsModal.classList.remove('open');
+    }
+  });
 }
 
 const backToTopBtn = document.getElementById('back-to-top');
