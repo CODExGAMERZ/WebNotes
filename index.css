@@ -2889,3 +2889,92 @@ a:hover { color: var(--accent-secondary); }
   font-size: 0.85rem;
   color: var(--text-muted);
 }
+
+/* ========================================
+   WebNotes Reader Custom Themes & Font Sizes
+   ======================================== */
+#note-viewer[data-theme="light"] {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #e2e8f0;
+  --bg-card: rgba(255, 255, 255, 0.85);
+  --bg-glass: rgba(15, 23, 42, 0.04);
+  --bg-glass-hover: rgba(15, 23, 42, 0.08);
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --border-subtle: rgba(15, 23, 42, 0.08);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+#note-viewer[data-theme="light"] .note-viewer-title {
+  color: var(--text-primary);
+}
+
+#note-viewer[data-theme="light"] .toc-title {
+  color: var(--text-primary);
+}
+
+#note-viewer[data-theme="light"] .toc-link {
+  color: var(--text-secondary);
+}
+
+#note-viewer[data-theme="light"] .toc-link.active {
+  color: var(--accent-primary);
+}
+
+#note-viewer[data-theme="sepia"] {
+  --bg-primary: #fdf6e3;
+  --bg-secondary: #eee8d5;
+  --bg-card: rgba(253, 246, 227, 0.9);
+  --bg-glass: rgba(88, 110, 117, 0.05);
+  --bg-glass-hover: rgba(88, 110, 117, 0.1);
+  --text-primary: #586e75;
+  --text-secondary: #657b83;
+  --text-muted: #93a1a1;
+  --border-subtle: rgba(88, 110, 117, 0.15);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+#note-viewer[data-theme="sepia"] .note-viewer-title {
+  color: var(--text-primary);
+}
+
+#note-viewer[data-theme="sepia"] .toc-title {
+  color: var(--text-primary);
+}
+
+#note-viewer[data-theme="sepia"] .toc-link {
+  color: var(--text-secondary);
+}
+
+#note-viewer[data-theme="sepia"] .toc-link.active {
+  color: #b58900;
+}
+
+#note-viewer .markdown-body {
+  font-size: var(--reader-font-size, 1rem) !important;
+  line-height: 1.7;
+}
+
+/* Speech control highlighted spoken text class */
+.speech-highlight {
+  background-color: rgba(253, 203, 110, 0.4);
+  border-radius: 3px;
+  transition: background-color 0.2s ease;
+}
+
+#note-viewer[data-theme="light"] .btn-speech-control,
+#note-viewer[data-theme="light"] .btn-font-size {
+  border: 1px solid rgba(0,0,0,0.1) !important;
+  background: rgba(0,0,0,0.05) !important;
+  color: #000 !important;
+}
+
+#note-viewer[data-theme="sepia"] .btn-speech-control,
+#note-viewer[data-theme="sepia"] .btn-font-size {
+  border: 1px solid rgba(88, 110, 117, 0.15) !important;
+  background: rgba(88, 110, 117, 0.05) !important;
+  color: #586e75 !important;
+}

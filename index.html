@@ -208,6 +208,33 @@
             ← Back to Notes
           </button>
           <div class="note-viewer-action-buttons">
+            <!-- Speech controls -->
+            <div class="speech-controls-group" style="display: flex; align-items: center; gap: 6px;">
+              <button class="btn-speech-control" id="btn-speech-play" title="Listen to Note">
+                🔊 Speak
+              </button>
+              <button class="btn-speech-control" id="btn-speech-pause" style="display:none;" title="Pause Reading">
+                ⏸ Pause
+              </button>
+              <button class="btn-speech-control" id="btn-speech-stop" style="display:none;" title="Stop Reading">
+                ⏹ Stop
+              </button>
+              <input type="range" id="speech-speed" min="0.5" max="2" step="0.1" value="1" title="Reading Speed" style="display:none; width: 60px; height: 6px; vertical-align: middle;">
+            </div>
+
+            <!-- Reading Theme Selector -->
+            <div class="theme-select-group" style="display: flex; gap: 4px;">
+              <button class="btn-reader-theme" id="btn-theme-dark" title="Dark Mode" style="padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); cursor: pointer; color: #fff;">🌑</button>
+              <button class="btn-reader-theme" id="btn-theme-light" title="Light Mode" style="padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.1); background: #f1f5f9; cursor: pointer; color: #000;">☀️</button>
+              <button class="btn-reader-theme" id="btn-theme-sepia" title="Sepia Mode" style="padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(243,224,197,0.3); background: #fdf6e3; cursor: pointer; color: #586e75;">📜</button>
+            </div>
+
+            <!-- Font Sizer -->
+            <div class="font-size-group" style="display: flex; gap: 4px;">
+              <button class="btn-font-size" id="btn-font-dec" title="Decrease Font Size" style="padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: inherit; cursor: pointer;">A-</button>
+              <button class="btn-font-size" id="btn-font-inc" title="Increase Font Size" style="padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: inherit; cursor: pointer;">A+</button>
+            </div>
+
             <button class="btn-toc-toggle" id="toc-toggle-btn" title="Outline">
               📋 Outline
             </button>

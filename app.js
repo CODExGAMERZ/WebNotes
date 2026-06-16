@@ -601,6 +601,7 @@ async function openNote(note) {
 }
 
 function closeNoteViewer(scrollToSectionId = null) {
+  if (typeof stopSpeaking === 'function') stopSpeaking();
   noteViewer.classList.add('page-fade-out');
 
   if (tocSidebar && tocSidebar.classList.contains('open')) {
@@ -1435,6 +1436,170 @@ blockquote, .callout { border-left: 4px solid #6c5ce7; background: #f0eeff; colo
   downloadPdfBtn.disabled = false;
   downloadPdfBtn.innerHTML = originalHTML;
 });
+
+// ════════════════════════════════════════════
+//  SPEECH SYNTHESIS NARRATOR ENGINE
+// ════════════════════════════════════════════
+let speechUtterances = [];
+let speechIndex = 0;
+let isSpeaking = false;
+let isPaused = false;
+const synth = window.speechSynthesis;
+
+function stopSpeaking() {
+  if (synth) {
+    synth.cancel();
+  }
+  isSpeaking = false;
+  isPaused = false;
+  updateSpeechButtons();
+  removeSpeechHighlights();
+}
+
+function removeSpeechHighlights() {
+  document.querySelectorAll('.speech-highlight').forEach(el => {
+    el.classList.remove('speech-highlight');
+  });
+}
+
+function speakNote() {
+  if (isPaused) {
+    synth.resume();
+    isPaused = false;
+    updateSpeechButtons();
+    return;
+  }
+  
+  stopSpeaking();
+  
+  // Gather speakable elements inside note viewer content
+  const speakableElements = Array.from(viewerContent.querySelectorAll('h1, h2, h3, h4, p, li, td'));
+  if (speakableElements.length === 0) return;
+  
+  speechUtterances = speakableElements.map(el => {
+    if (el.closest('pre') || el.closest('code') || el.closest('.code-header') || el.closest('.toc-sidebar')) {
+      return null;
+    }
+    return {
+      text: el.textContent.trim(),
+      element: el
+    };
+  }).filter(item => item !== null && item.text.length > 0);
+  
+  if (speechUtterances.length === 0) return;
+  
+  speechIndex = 0;
+  isSpeaking = true;
+  updateSpeechButtons();
+  speakNext();
+}
+
+function speakNext() {
+  if (!isSpeaking || speechIndex >= speechUtterances.length) {
+    stopSpeaking();
+    return;
+  }
+  
+  const item = speechUtterances[speechIndex];
+  removeSpeechHighlights();
+  item.element.classList.add('speech-highlight');
+  
+  // Center spoken element in view
+  item.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  
+  const speed = parseFloat(document.getElementById('speech-speed').value) || 1;
+  const utter = new SpeechSynthesisUtterance(item.text);
+  utter.rate = speed;
+  
+  utter.onend = () => {
+    if (isSpeaking && !isPaused) {
+      speechIndex++;
+      speakNext();
+    }
+  };
+  
+  utter.onerror = (e) => {
+    console.error('Speech error', e);
+    stopSpeaking();
+  };
+  
+  synth.speak(utter);
+}
+
+function pauseSpeaking() {
+  if (synth && isSpeaking) {
+    synth.pause();
+    isPaused = true;
+    updateSpeechButtons();
+  }
+}
+
+function updateSpeechButtons() {
+  const playBtn = document.getElementById('btn-speech-play');
+  const pauseBtn = document.getElementById('btn-speech-pause');
+  const stopBtn = document.getElementById('btn-speech-stop');
+  const speedSlider = document.getElementById('speech-speed');
+  
+  if (isSpeaking) {
+    playBtn.style.display = 'none';
+    pauseBtn.style.display = 'inline-block';
+    stopBtn.style.display = 'inline-block';
+    speedSlider.style.display = 'inline-block';
+    
+    if (isPaused) {
+      pauseBtn.innerHTML = '▶ Resume';
+    } else {
+      pauseBtn.innerHTML = '⏸ Pause';
+    }
+  } else {
+    playBtn.style.display = 'inline-block';
+    pauseBtn.style.display = 'none';
+    stopBtn.style.display = 'none';
+    speedSlider.style.display = 'none';
+  }
+}
+
+// Attach TTS Listeners
+document.getElementById('btn-speech-play').addEventListener('click', speakNote);
+document.getElementById('btn-speech-pause').addEventListener('click', pauseSpeaking);
+document.getElementById('btn-speech-stop').addEventListener('click', stopSpeaking);
+
+// ── Theme Switcher ──
+const setReaderTheme = (theme) => {
+  noteViewer.setAttribute('data-theme', theme);
+  localStorage.setItem('webnotes_reader_theme', theme);
+};
+
+document.getElementById('btn-theme-dark').addEventListener('click', () => setReaderTheme('dark'));
+document.getElementById('btn-theme-light').addEventListener('click', () => setReaderTheme('light'));
+document.getElementById('btn-theme-sepia').addEventListener('click', () => setReaderTheme('sepia'));
+
+// ── Font Sizer ──
+let readerFontSize = parseFloat(localStorage.getItem('webnotes_font_size')) || 1.0;
+const updateFontSizer = () => {
+  noteViewer.style.setProperty('--reader-font-size', `${readerFontSize}rem`);
+  localStorage.setItem('webnotes_font_size', readerFontSize);
+};
+
+document.getElementById('btn-font-dec').addEventListener('click', () => {
+  readerFontSize = Math.max(0.7, readerFontSize - 0.1);
+  updateFontSizer();
+});
+
+document.getElementById('btn-font-inc').addEventListener('click', () => {
+  readerFontSize = Math.min(1.6, readerFontSize + 0.1);
+  updateFontSizer();
+});
+
+// Load preferences on viewer launch
+window.addEventListener('load', () => {
+  const savedTheme = localStorage.getItem('webnotes_reader_theme') || 'dark';
+  setReaderTheme(savedTheme);
+  updateFontSizer();
+});
+
+// Expose stopSpeaking to window
+window.stopSpeaking = stopSpeaking;
 
 // ════════════════════════════════════════════
 //  BOOT
